@@ -3,6 +3,10 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { FileText, Edit, Download, Trash2, Plus, Calendar, User, Mail } from "lucide-react";
 
 interface CV {
   id: string;
@@ -65,109 +69,129 @@ export default function CVDashboard({ cvs }: CVDashboardProps) {
       setLoading(null);
     }
   };
-
   if (cvs.length === 0) {
     return (
-      <div className="text-center py-12">
-        <div className="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-          <svg
-            className="w-12 h-12 text-gray-400"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-            />
-          </svg>
-        </div>
-        <h3 className="text-lg font-medium text-gray-900 mb-2">No CVs yet</h3>
-        <p className="text-gray-500 mb-4">
-          Get started by creating your first professional CV
-        </p>
-        <Link
-          href="/cv/create"
-          className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
-        >
-          Create Your First CV
-        </Link>
-      </div>
+      <Card className="text-center py-12 border-dashed">
+        <CardContent className="pt-6">
+          <div className="mx-auto w-24 h-24 bg-muted rounded-full flex items-center justify-center mb-6">
+            <FileText className="w-12 h-12 text-muted-foreground" />
+          </div>
+          <CardTitle className="text-xl mb-2">No CVs yet</CardTitle>
+          <CardDescription className="mb-6">
+            Get started by creating your first professional CV
+          </CardDescription>
+          <Button asChild size="lg">
+            <Link href="/cv/create">
+              <Plus className="w-4 h-4 mr-2" />
+              Create Your First CV
+            </Link>
+          </Button>
+        </CardContent>
+      </Card>
     );
   }
-
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {cvs.map((cv) => (
-        <div
-          key={cv.id}
-          className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow"
-        >
-          <div className="p-6">
-            <div className="flex justify-between items-start mb-3">
-              <h3 className="text-xl font-semibold text-gray-900 truncate">
+        <Card key={cv.id} className="hover:shadow-lg transition-all duration-300 group">
+          <CardHeader className="pb-3">
+            <div className="flex justify-between items-start mb-2">
+              <CardTitle className="text-lg truncate pr-2">
                 {cv.title}
-              </h3>
-              <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
+              </CardTitle>
+              <Badge variant="secondary" className="shrink-0">
                 {cv.template}
-              </span>
+              </Badge>
             </div>
-
-            <div className="text-sm text-gray-500 mb-4">
-              <p>Created: {new Date(cv.createdAt).toLocaleDateString()}</p>
-              <p>Updated: {new Date(cv.updatedAt).toLocaleDateString()}</p>
+            <div className="flex items-center gap-4 text-xs text-muted-foreground">
+              <div className="flex items-center gap-1">
+                <Calendar className="w-3 h-3" />
+                Created: {new Date(cv.createdAt).toLocaleDateString()}
+              </div>
             </div>
+            <div className="text-xs text-muted-foreground">
+              Updated: {new Date(cv.updatedAt).toLocaleDateString()}
+            </div>
+          </CardHeader>
 
+          <CardContent className="pt-0">
             {/* Preview of CV content */}
-            <div className="text-sm text-gray-600 mb-4">
+            <div className="mb-4 p-3 bg-muted/50 rounded-md">
               {cv.content?.personalInfo?.name && (
-                <p className="font-medium">{cv.content.personalInfo.name}</p>
+                <div className="flex items-center gap-2 mb-1">
+                  <User className="w-3 h-3 text-muted-foreground" />
+                  <p className="font-medium text-sm">{cv.content.personalInfo.name}</p>
+                </div>
               )}
               {cv.content?.personalInfo?.email && (
-                <p>{cv.content.personalInfo.email}</p>
+                <div className="flex items-center gap-2">
+                  <Mail className="w-3 h-3 text-muted-foreground" />
+                  <p className="text-sm text-muted-foreground">{cv.content.personalInfo.email}</p>
+                </div>
               )}
             </div>
 
             <div className="space-y-2">
-              <div className="flex space-x-2">
-                <Link
-                  href={`/cv/edit/${cv.id}`}
-                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-center py-2 px-3 rounded text-sm transition-colors"
-                >
-                  Edit
-                </Link>
+              <div className="flex gap-2">
+                <Button asChild variant="default" size="sm" className="flex-1">
+                  <Link href={`/cv/edit/${cv.id}`}>
+                    <Edit className="w-3 h-3 mr-1" />
+                    Edit
+                  </Link>
+                </Button>
 
                 {cv.filePath ? (
-                  <a
-                    href={`/api/cv/${cv.id}/download`}
-                    className="flex-1 bg-green-600 hover:bg-green-700 text-white text-center py-2 px-3 rounded text-sm transition-colors"
-                    download
-                  >
-                    Download
-                  </a>
+                  <Button asChild variant="outline" size="sm" className="flex-1">
+                    <a href={`/api/cv/${cv.id}/download`} download>
+                      <Download className="w-3 h-3 mr-1" />
+                      Download
+                    </a>
+                  </Button>
                 ) : (
-                  <button
+                  <Button
                     onClick={() => handleGeneratePDF(cv)}
                     disabled={loading === cv.id}
-                    className="flex-1 bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white py-2 px-3 rounded text-sm transition-colors"
+                    variant="outline"
+                    size="sm"
+                    className="flex-1"
                   >
-                    {loading === cv.id ? "Generating..." : "Generate PDF"}
-                  </button>
+                    {loading === cv.id ? (
+                      <>
+                        <div className="w-3 h-3 mr-1 animate-spin rounded-full border-2 border-muted-foreground border-t-transparent" />
+                        Generating...
+                      </>
+                    ) : (
+                      <>
+                        <FileText className="w-3 h-3 mr-1" />
+                        Generate PDF
+                      </>
+                    )}
+                  </Button>
                 )}
               </div>
 
-              <button
+              <Button
                 onClick={() => handleDelete(cv.id)}
                 disabled={loading === cv.id}
-                className="w-full bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white py-2 px-3 rounded text-sm transition-colors"
+                variant="destructive"
+                size="sm"
+                className="w-full"
               >
-                {loading === cv.id ? "Deleting..." : "Delete"}
-              </button>
+                {loading === cv.id ? (
+                  <>
+                    <div className="w-3 h-3 mr-1 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                    Deleting...
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="w-3 h-3 mr-1" />
+                    Delete
+                  </>
+                )}
+              </Button>
             </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
       ))}
     </div>
   );

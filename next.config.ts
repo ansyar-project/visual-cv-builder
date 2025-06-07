@@ -7,6 +7,15 @@ const nextConfig: NextConfig = {
     optimizeServerReact: true,
   },
 
+  // Turbopack configuration (now stable)
+  // turbopack: {
+  //   resolveAlias: {
+  //     fs: "./empty-module.js",
+  //     path: "./empty-module.js",
+  //     os: "./empty-module.js",
+  //   },
+  // },
+
   // Image optimization
   images: {
     formats: ["image/webp", "image/avif"],
@@ -66,17 +75,6 @@ const nextConfig: NextConfig = {
         permanent: true,
       },
     ];
-  },
-
-  // Bundle analyzer for optimization
-  webpack: (config, { isServer }) => {
-    if (!isServer) {
-      config.resolve.fallback = {
-        ...config.resolve.fallback,
-        fs: false,
-      };
-    }
-    return config;
   },
 };
 

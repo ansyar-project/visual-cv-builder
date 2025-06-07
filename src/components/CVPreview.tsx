@@ -1,3 +1,16 @@
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import {
+  Mail,
+  Phone,
+  MapPin,
+  User,
+  FileText,
+  Briefcase,
+  GraduationCap,
+  Wrench,
+} from "lucide-react";
+
 interface CVPreviewProps {
   data: {
     personalInfo: {
@@ -35,124 +48,159 @@ export default function CVPreview({ data }: CVPreviewProps) {
   const filteredSkills = data.skills.filter((skill) => skill.trim());
 
   return (
-    <div className="bg-white p-8 shadow-lg rounded-lg max-h-screen overflow-y-auto">
-      {/* Header */}
-      <div className="text-center border-b-2 border-blue-600 pb-6 mb-8">
-        <h1 className="text-4xl font-bold text-gray-800 mb-3">
-          {data.personalInfo.name || "Your Name"}
-        </h1>
-        <div className="text-lg text-gray-600 space-x-4">
-          {data.personalInfo.email && <span>{data.personalInfo.email}</span>}
-          {data.personalInfo.phone && <span>• {data.personalInfo.phone}</span>}
-          {data.personalInfo.location && (
-            <span>• {data.personalInfo.location}</span>
+    <div className="w-full" style={{ aspectRatio: "1 / 1.414" }}>
+      <Card className="h-full overflow-y-auto">
+        <CardContent className="p-8 h-full">
+          {/* Header */}
+          <div className="text-center border-b pb-6 mb-8">
+            <h1 className="text-4xl font-bold mb-3">
+              {data.personalInfo.name || "Your Name"}
+            </h1>
+            <div className="flex flex-wrap justify-center gap-4 text-muted-foreground">
+              {data.personalInfo.email && (
+                <div className="flex items-center gap-1">
+                  <Mail className="w-4 h-4" />
+                  <span>{data.personalInfo.email}</span>
+                </div>
+              )}
+              {data.personalInfo.phone && (
+                <div className="flex items-center gap-1">
+                  <Phone className="w-4 h-4" />
+                  <span>{data.personalInfo.phone}</span>
+                </div>
+              )}
+              {data.personalInfo.location && (
+                <div className="flex items-center gap-1">
+                  <MapPin className="w-4 h-4" />
+                  <span>{data.personalInfo.location}</span>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Professional Summary */}
+          {data.summary && (
+            <div className="mb-8">
+              <h2 className="text-2xl font-semibold border-b pb-2 mb-4 flex items-center gap-2">
+                <User className="w-5 h-5" />
+                Professional Summary
+              </h2>
+              <p className="text-muted-foreground leading-relaxed">
+                {data.summary}
+              </p>
+            </div>
           )}
-        </div>
-      </div>
 
-      {/* Professional Summary */}
-      {data.summary && (
-        <div className="mb-8">
-          <h2 className="text-2xl font-bold text-gray-800 border-b border-gray-300 pb-2 mb-4">
-            Professional Summary
-          </h2>
-          <p className="text-gray-700 leading-relaxed">{data.summary}</p>
-        </div>
-      )}
-
-      {/* Experience */}
-      {filteredExperience.length > 0 && (
-        <div className="mb-8">
-          <h2 className="text-2xl font-bold text-gray-800 border-b border-gray-300 pb-2 mb-4">
-            Experience
-          </h2>
-          {filteredExperience.map((exp, index) => (
-            <div key={index} className="mb-6 last:mb-0">
-              <div className="flex justify-between items-start mb-2">
-                <div>
-                  <h3 className="text-xl font-semibold text-gray-800">
-                    {exp.position || "Position"}
-                  </h3>
-                  <p className="text-lg text-gray-600 italic">
-                    {exp.company || "Company"}
-                  </p>
-                </div>
-                <span className="text-gray-600 font-medium">
-                  {exp.duration || "Duration"}
-                </span>
+          {/* Experience */}
+          {filteredExperience.length > 0 && (
+            <div className="mb-8">
+              <h2 className="text-2xl font-semibold border-b pb-2 mb-4 flex items-center gap-2">
+                <Briefcase className="w-5 h-5" />
+                Experience
+              </h2>
+              <div className="space-y-6">
+                {filteredExperience.map((exp, index) => (
+                  <div
+                    key={index}
+                    className="border-l-2 border-muted pl-4 relative"
+                  >
+                    <div className="absolute -left-2 top-0 w-4 h-4 rounded-full bg-primary"></div>
+                    <div className="flex justify-between items-start mb-2">
+                      <div>
+                        <h3 className="text-xl font-semibold">
+                          {exp.position || "Position"}
+                        </h3>
+                        <p className="text-lg text-muted-foreground font-medium">
+                          {exp.company || "Company"}
+                        </p>
+                      </div>
+                      <Badge variant="outline" className="shrink-0 ml-2">
+                        {exp.duration || "Duration"}
+                      </Badge>
+                    </div>
+                    {exp.description && (
+                      <p className="text-muted-foreground leading-relaxed mt-2">
+                        {exp.description}
+                      </p>
+                    )}
+                  </div>
+                ))}
               </div>
-              {exp.description && (
-                <p className="text-gray-700 leading-relaxed mt-2">
-                  {exp.description}
-                </p>
-              )}
             </div>
-          ))}
-        </div>
-      )}
+          )}
 
-      {/* Education */}
-      {filteredEducation.length > 0 && (
-        <div className="mb-8">
-          <h2 className="text-2xl font-bold text-gray-800 border-b border-gray-300 pb-2 mb-4">
-            Education
-          </h2>
-          {filteredEducation.map((edu, index) => (
-            <div key={index} className="mb-6 last:mb-0">
-              <div className="flex justify-between items-start mb-2">
-                <div>
-                  <h3 className="text-xl font-semibold text-gray-800">
-                    {edu.degree || "Degree"}
-                  </h3>
-                  <p className="text-lg text-gray-600 italic">
-                    {edu.institution || "Institution"}
-                  </p>
-                </div>
-                <span className="text-gray-600 font-medium">
-                  {edu.year || "Year"}
-                </span>
+          {/* Education */}
+          {filteredEducation.length > 0 && (
+            <div className="mb-8">
+              <h2 className="text-2xl font-semibold border-b pb-2 mb-4 flex items-center gap-2">
+                <GraduationCap className="w-5 h-5" />
+                Education
+              </h2>
+              <div className="space-y-6">
+                {filteredEducation.map((edu, index) => (
+                  <div
+                    key={index}
+                    className="border-l-2 border-muted pl-4 relative"
+                  >
+                    <div className="absolute -left-2 top-0 w-4 h-4 rounded-full bg-primary"></div>
+                    <div className="flex justify-between items-start mb-2">
+                      <div>
+                        <h3 className="text-xl font-semibold">
+                          {edu.degree || "Degree"}
+                        </h3>
+                        <p className="text-lg text-muted-foreground font-medium">
+                          {edu.institution || "Institution"}
+                        </p>
+                      </div>
+                      <Badge variant="outline" className="shrink-0 ml-2">
+                        {edu.year || "Year"}
+                      </Badge>
+                    </div>
+                    {edu.description && (
+                      <p className="text-muted-foreground leading-relaxed mt-2">
+                        {edu.description}
+                      </p>
+                    )}
+                  </div>
+                ))}
               </div>
-              {edu.description && (
-                <p className="text-gray-700 leading-relaxed mt-2">
-                  {edu.description}
-                </p>
-              )}
             </div>
-          ))}
-        </div>
-      )}
+          )}
 
-      {/* Skills */}
-      {filteredSkills.length > 0 && (
-        <div className="mb-8">
-          <h2 className="text-2xl font-bold text-gray-800 border-b border-gray-300 pb-2 mb-4">
-            Skills
-          </h2>
-          <div className="flex flex-wrap gap-3">
-            {filteredSkills.map((skill, index) => (
-              <span
-                key={index}
-                className="bg-blue-600 text-white px-4 py-2 rounded-full text-sm font-medium"
-              >
-                {skill}
-              </span>
-            ))}
-          </div>
-        </div>
-      )}
+          {/* Skills */}
+          {filteredSkills.length > 0 && (
+            <div className="mb-8">
+              <h2 className="text-2xl font-semibold border-b pb-2 mb-4 flex items-center gap-2">
+                <Wrench className="w-5 h-5" />
+                Skills
+              </h2>
+              <div className="flex flex-wrap gap-2">
+                {filteredSkills.map((skill, index) => (
+                  <Badge key={index} variant="default" className="text-sm">
+                    {skill}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          )}
 
-      {/* Empty state */}
-      {!data.personalInfo.name &&
-        !data.summary &&
-        filteredExperience.length === 0 &&
-        filteredEducation.length === 0 &&
-        filteredSkills.length === 0 && (
-          <div className="text-center text-gray-500 py-12">
-            <p className="text-lg">
-              Start filling out the form to see your CV preview
-            </p>
-          </div>
-        )}
+          {/* Empty state */}
+          {!data.personalInfo.name &&
+            !data.summary &&
+            filteredExperience.length === 0 &&
+            filteredEducation.length === 0 &&
+            filteredSkills.length === 0 && (
+              <div className="text-center text-muted-foreground py-12">
+                <div className="mx-auto w-16 h-16 bg-muted rounded-full flex items-center justify-center mb-4">
+                  <FileText className="w-8 h-8" />
+                </div>
+                <p className="text-lg">
+                  Start filling out the form to see your CV preview
+                </p>
+              </div>
+            )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

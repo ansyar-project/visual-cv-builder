@@ -2,6 +2,9 @@ import Link from "next/link";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { Metadata } from "next";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { FileText, CheckCircle, Download, Zap, Shield, Users, ArrowRight } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Professional CV Builder - Create ATS-Friendly Resumes Online",
@@ -62,150 +65,126 @@ export default async function Home() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+      <div className="min-h-screen bg-gradient-to-br from-background to-secondary/20">
         <main className="container mx-auto px-4 py-16">
           {/* Hero Section */}
-          <section className="text-center mb-16">
-            <h1 className="text-5xl font-bold text-gray-900 mb-6">
-              Create Your Perfect Professional CV
-            </h1>
-            <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-              Build professional, ATS-friendly CVs with our intuitive builder.
-              Choose from multiple templates and export to PDF instantly. Land
-              your dream job with a standout resume.
-            </p>
-            <div className="flex gap-4 justify-center">
-              {session ? (
-                <Link
-                  href="/cv"
-                  className="bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
-                  aria-label="Access your CV dashboard"
-                >
-                  Go to Dashboard
-                </Link>
-              ) : (
-                <>
-                  <Link
-                    href="/auth/signup"
-                    className="bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
-                    aria-label="Create free account to start building your CV"
-                  >
-                    Get Started Free
-                  </Link>
-                  <Link
-                    href="/auth/signin"
-                    className="border border-blue-600 text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-blue-50 transition-colors"
-                    aria-label="Sign in to your existing account"
-                  >
-                    Sign In
-                  </Link>
-                </>
-              )}
+          <section className="text-center mb-20">
+            <div className="max-w-4xl mx-auto">
+              <h1 className="text-6xl font-bold mb-6 bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+                Create Your Perfect Professional CV
+              </h1>
+              <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto leading-relaxed">
+                Build professional, ATS-friendly CVs with our intuitive builder.
+                Choose from multiple templates and export to PDF instantly. Land
+                your dream job with a standout resume.
+              </p>
+              <div className="flex gap-4 justify-center flex-wrap">
+                {session ? (
+                  <Button size="lg" asChild className="text-lg px-8 py-6">
+                    <Link href="/cv" className="flex items-center gap-2">
+                      Go to Dashboard
+                      <ArrowRight className="h-5 w-5" />
+                    </Link>
+                  </Button>
+                ) : (
+                  <>
+                    <Button size="lg" asChild className="text-lg px-8 py-6">
+                      <Link href="/auth/signup" className="flex items-center gap-2">
+                        Get Started Free
+                        <ArrowRight className="h-5 w-5" />
+                      </Link>
+                    </Button>
+                    <Button variant="outline" size="lg" asChild className="text-lg px-8 py-6">
+                      <Link href="/auth/signin">Sign In</Link>
+                    </Button>
+                  </>
+                )}
+              </div>
             </div>
           </section>
 
           {/* Features Section */}
-          <section className="grid md:grid-cols-3 gap-8 mb-16">
-            <article className="bg-white p-6 rounded-lg shadow-md">
-              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
-                <svg
-                  className="w-6 h-6 text-blue-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  aria-hidden="true"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                  />
-                </svg>
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                Easy to Use
-              </h3>
-              <p className="text-gray-600">
-                Intuitive drag-and-drop interface makes creating your CV simple
-                and fast. No design experience required.
-              </p>
-            </article>
+          <section className="grid md:grid-cols-3 gap-8 mb-20">
+            <Card className="group hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+              <CardHeader>
+                <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
+                  <Zap className="h-6 w-6 text-primary" />
+                </div>
+                <CardTitle className="text-xl">Easy to Use</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <CardDescription className="text-base">
+                  Intuitive interface makes creating your CV simple and fast. No design experience required.
+                </CardDescription>
+              </CardContent>
+            </Card>
 
-            <article className="bg-white p-6 rounded-lg shadow-md">
-              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
-                <svg
-                  className="w-6 h-6 text-green-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  aria-hidden="true"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                ATS Friendly
-              </h3>
-              <p className="text-gray-600">
-                Our templates are optimized for Applicant Tracking Systems to
-                help you get noticed by employers and recruiters.
-              </p>
-            </article>
+            <Card className="group hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+              <CardHeader>
+                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4 group-hover:bg-green-200 transition-colors">
+                  <Shield className="h-6 w-6 text-green-600" />
+                </div>
+                <CardTitle className="text-xl">ATS Friendly</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <CardDescription className="text-base">
+                  Our templates are optimized for Applicant Tracking Systems to help you get noticed by employers.
+                </CardDescription>
+              </CardContent>
+            </Card>
 
-            <article className="bg-white p-6 rounded-lg shadow-md">
-              <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
-                <svg
-                  className="w-6 h-6 text-purple-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  aria-hidden="true"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                  />
-                </svg>
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                PDF Export
-              </h3>
-              <p className="text-gray-600">
-                Download your CV as a high-quality PDF ready for printing or
-                digital sharing. Professional formatting guaranteed.
-              </p>
-            </article>
+            <Card className="group hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+              <CardHeader>
+                <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4 group-hover:bg-purple-200 transition-colors">
+                  <Download className="h-6 w-6 text-purple-600" />
+                </div>
+                <CardTitle className="text-xl">PDF Export</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <CardDescription className="text-base">
+                  Download your CV as a high-quality PDF ready for printing or digital sharing.
+                </CardDescription>
+              </CardContent>
+            </Card>
+          </section>
+
+          {/* Stats Section */}
+          <section className="grid md:grid-cols-3 gap-8 mb-20">
+            <div className="text-center">
+              <div className="text-4xl font-bold text-primary mb-2">10,000+</div>
+              <div className="text-muted-foreground">CVs Created</div>
+            </div>
+            <div className="text-center">
+              <div className="text-4xl font-bold text-primary mb-2">95%</div>
+              <div className="text-muted-foreground">Success Rate</div>
+            </div>
+            <div className="text-center">
+              <div className="text-4xl font-bold text-primary mb-2">24/7</div>
+              <div className="text-muted-foreground">Support</div>
+            </div>
           </section>
 
           {/* CTA Section */}
-          <section className="bg-white rounded-lg shadow-lg p-8 text-center">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              Ready to Build Your CV?
-            </h2>
-            <p className="text-gray-600 mb-6">
-              Join thousands of professionals who have landed their dream jobs
-              with our CV builder. Start creating your professional resume
-              today.
-            </p>
-            <Link
-              href={session ? "/cv" : "/auth/signup"}
-              className="bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors inline-block"
-              aria-label={
-                session
-                  ? "Go to CV dashboard"
-                  : "Sign up to start building your CV"
-              }
-            >
-              Start Building Now
-            </Link>
+          <section className="text-center">
+            <Card className="max-w-2xl mx-auto">
+              <CardHeader>
+                <CardTitle className="text-3xl mb-4">Ready to Build Your CV?</CardTitle>
+                <CardDescription className="text-lg">
+                  Join thousands of professionals who have landed their dream jobs with our CV builder.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Button size="lg" asChild className="text-lg px-8 py-6">
+                  <Link
+                    href={session ? "/cv" : "/auth/signup"}
+                    className="flex items-center gap-2"
+                  >
+                    Start Building Now
+                    <ArrowRight className="h-5 w-5" />
+                  </Link>
+                </Button>
+              </CardContent>
+            </Card>
           </section>
         </main>
       </div>

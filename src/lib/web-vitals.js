@@ -9,8 +9,8 @@ function getCLS(onPerfEntry) {
     onPerfEntry instanceof Function
   ) {
     import("web-vitals")
-      .then(({ getCLS }) => {
-        getCLS(onPerfEntry);
+      .then(({ onCLS }) => {
+        onCLS(onPerfEntry);
       })
       .catch(console.error);
   }
@@ -23,8 +23,9 @@ function getFID(onPerfEntry) {
     onPerfEntry instanceof Function
   ) {
     import("web-vitals")
-      .then(({ getFID }) => {
-        getFID(onPerfEntry);
+      .then(({ onINP }) => {
+        // FID is deprecated, use INP (Interaction to Next Paint) instead
+        onINP(onPerfEntry);
       })
       .catch(console.error);
   }
@@ -37,8 +38,8 @@ function getFCP(onPerfEntry) {
     onPerfEntry instanceof Function
   ) {
     import("web-vitals")
-      .then(({ getFCP }) => {
-        getFCP(onPerfEntry);
+      .then(({ onFCP }) => {
+        onFCP(onPerfEntry);
       })
       .catch(console.error);
   }
@@ -51,8 +52,8 @@ function getLCP(onPerfEntry) {
     onPerfEntry instanceof Function
   ) {
     import("web-vitals")
-      .then(({ getLCP }) => {
-        getLCP(onPerfEntry);
+      .then(({ onLCP }) => {
+        onLCP(onPerfEntry);
       })
       .catch(console.error);
   }
@@ -65,8 +66,8 @@ function getTTFB(onPerfEntry) {
     onPerfEntry instanceof Function
   ) {
     import("web-vitals")
-      .then(({ getTTFB }) => {
-        getTTFB(onPerfEntry);
+      .then(({ onTTFB }) => {
+        onTTFB(onPerfEntry);
       })
       .catch(console.error);
   }
