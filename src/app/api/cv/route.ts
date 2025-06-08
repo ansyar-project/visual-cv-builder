@@ -2,9 +2,15 @@ import { NextRequest, NextResponse } from "next/server";
 import { cvOperations } from "@/lib/db";
 import { getCurrentUser } from "@/lib/session";
 import { sanitizeCVData } from "@/lib/sanitization";
+import { rateLimiters, applyRateLimit } from "@/lib/rate-limit";
 
 // GET - Fetch user's CVs
-export async function GET() {
+export async function GET(request: NextRequest) {
+  // Apply general rate limiting for GET requests
+  const rateLimitResponse = await applyRateLimit(request, rateLimiters.general);
+  if (rateLimitResponse) {
+    return rateLimitResponse;
+  }
   try {
     const user = await getCurrentUser();
 
@@ -26,6 +32,15 @@ export async function GET() {
 
 // POST - Create new CV
 export async function POST(request: NextRequest) {
+  // Apply rate limiting for CV creation
+  const rateLimitResponse = await applyRateLimit(
+    request,
+    rateLimiters.cvCreate
+  );
+  if (rateLimitResponse) {
+    return rateLimitResponse;
+  }
+
   try {
     const user = await getCurrentUser();
 

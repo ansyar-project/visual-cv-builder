@@ -6,10 +6,19 @@ import {
   validateCVData,
 } from "@/lib/generate-pdf";
 import { sanitizeCVData } from "@/lib/sanitization";
+import { rateLimiters, applyRateLimit } from "@/lib/rate-limit";
 import { v4 as uuidv4 } from "uuid";
 
 // POST - Generate PDF from CV data (without saving to database)
 export async function POST(request: NextRequest) {
+  // Apply rate limiting for PDF generation
+  const rateLimitResponse = await applyRateLimit(
+    request,
+    rateLimiters.pdfGenerate
+  );
+  if (rateLimitResponse) {
+    return rateLimitResponse;
+  }
   try {
     const user = await getCurrentUser();
 

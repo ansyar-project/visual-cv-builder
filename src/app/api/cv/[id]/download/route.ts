@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cvOperations } from "@/lib/db";
 import { getCurrentUser } from "@/lib/session";
+import { rateLimiters, applyRateLimit } from "@/lib/rate-limit";
 import fs from "fs/promises";
 import path from "path";
 
@@ -8,6 +9,15 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  // Apply rate limiting for file downloads
+  const rateLimitResponse = await applyRateLimit(
+    request,
+    rateLimiters.download
+  );
+  if (rateLimitResponse) {
+    return rateLimitResponse;
+  }
+
   try {
     const { id } = await params;
     const user = await getCurrentUser();

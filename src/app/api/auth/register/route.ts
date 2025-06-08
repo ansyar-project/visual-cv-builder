@@ -1,8 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { userOperations } from "@/lib/db";
 import { sanitizeText, sanitizeEmail } from "@/lib/sanitization";
+import { rateLimiters, applyRateLimit } from "@/lib/rate-limit";
 
 export async function POST(request: NextRequest) {
+  // Apply rate limiting for user registration
+  const rateLimitResponse = await applyRateLimit(
+    request,
+    rateLimiters.register
+  );
+  if (rateLimitResponse) {
+    return rateLimitResponse;
+  }
   try {
     const { name, email, password } = await request.json();
 

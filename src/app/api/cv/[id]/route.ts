@@ -2,12 +2,18 @@ import { NextRequest, NextResponse } from "next/server";
 import { cvOperations } from "@/lib/db";
 import { getCurrentUser } from "@/lib/session";
 import { sanitizeCVData } from "@/lib/sanitization";
+import { rateLimiters, applyRateLimit } from "@/lib/rate-limit";
 
 // GET - Fetch specific CV
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  // Apply general rate limiting for GET requests
+  const rateLimitResponse = await applyRateLimit(request, rateLimiters.general);
+  if (rateLimitResponse) {
+    return rateLimitResponse;
+  }
   try {
     const { id } = await params;
     const user = await getCurrentUser();
@@ -37,6 +43,15 @@ export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  // Apply rate limiting for CV updates
+  const rateLimitResponse = await applyRateLimit(
+    request,
+    rateLimiters.cvUpdate
+  );
+  if (rateLimitResponse) {
+    return rateLimitResponse;
+  }
+
   try {
     const { id } = await params;
     const user = await getCurrentUser();
@@ -80,6 +95,12 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  // Apply general rate limiting for DELETE requests
+  const rateLimitResponse = await applyRateLimit(request, rateLimiters.general);
+  if (rateLimitResponse) {
+    return rateLimitResponse;
+  }
+
   try {
     const { id } = await params;
     const user = await getCurrentUser();
