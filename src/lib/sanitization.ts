@@ -60,11 +60,12 @@ export function sanitizeText(
   // Pre-sanitize dangerous content regardless of allowHTML setting
   sanitized = sanitized
     // Remove script tags and content
-    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "")
-    // Remove dangerous protocols
-    .replace(/javascript:/gi, "")
-    .replace(/vbscript:/gi, "")
-    .replace(/data:text\/html/gi, "")
+    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "") // Remove dangerous protocols - be more aggressive
+    .replace(/javascript\s*:/gi, "blocked:")
+    .replace(/vbscript\s*:/gi, "blocked:")
+    .replace(/data\s*:\s*text\/html/gi, "blocked:data")
+    .replace(/data\s*:\s*application\/javascript/gi, "blocked:data")
+    .replace(/data\s*:\s*text\/javascript/gi, "blocked:data")
     // Remove dangerous tags
     .replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, "")
     .replace(/<object\b[^<]*(?:(?!<\/object>)<[^<]*)*<\/object>/gi, "")
@@ -72,15 +73,19 @@ export function sanitizeText(
     .replace(/<link[^>]*>/gi, "")
     .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, "")
     .replace(/<meta[^>]*>/gi, "")
-    .replace(/<svg\b[^<]*(?:(?!<\/svg>)<[^<]*)*<\/svg>/gi, "")
-    // Remove event handlers
+    .replace(/<svg\b[^<]*(?:(?!<\/svg>)<[^<]*)*<\/svg>/gi, "") // Remove event handlers more aggressively
     .replace(/\son\w+\s*=\s*["'][^"']*["']/gi, "")
     .replace(/\son\w+\s*=\s*[^>\s]+/gi, "")
+    .replace(/on\w+\s*=\s*["'][^"']*["']/gi, "")
+    .replace(/on\w+\s*=\s*[^>\s]+/gi, "")
     // Remove dangerous function calls
-    .replace(/alert\s*\(/gi, "alert_blocked(")
-    .replace(/eval\s*\(/gi, "eval_blocked(")
-    .replace(/document\./gi, "document_blocked.")
-    .replace(/window\./gi, "window_blocked.");
+    .replace(/alert\s*\(/gi, "blocked_alert(")
+    .replace(/eval\s*\(/gi, "blocked_eval(")
+    .replace(/document\./gi, "blocked_document.")
+    .replace(/window\./gi, "blocked_window.")
+    // Remove dangerous keywords in general
+    .replace(/\bdocument\b/gi, "blocked_document")
+    .replace(/\bwindow\b/gi, "blocked_window");
 
   // If HTML is not allowed, escape all HTML entities
   if (!allowHTML) {

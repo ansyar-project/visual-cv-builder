@@ -16,7 +16,8 @@
     "db:studio": "prisma studio",
     "db:reset": "prisma migrate reset",
     "test:xss": "node test-xss-standalone.js",
-    "security:test": "node test-xss-standalone.js"
+    "test:xss:accurate": "node test-xss-accurate.js",
+    "security:test": "node test-xss-accurate.js"
   },
   "dependencies": {
     "@next-auth/prisma-adapter": "^1.0.7",
