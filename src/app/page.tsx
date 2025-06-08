@@ -3,8 +3,14 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { Metadata } from "next";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { FileText, CheckCircle, Download, Zap, Shield, Users, ArrowRight } from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Download, Zap, Shield, ArrowRight } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Professional CV Builder - Create ATS-Friendly Resumes Online",
@@ -89,12 +95,20 @@ export default async function Home() {
                 ) : (
                   <>
                     <Button size="lg" asChild className="text-lg px-8 py-6">
-                      <Link href="/auth/signup" className="flex items-center gap-2">
+                      <Link
+                        href="/auth/signup"
+                        className="flex items-center gap-2"
+                      >
                         Get Started Free
                         <ArrowRight className="h-5 w-5" />
                       </Link>
                     </Button>
-                    <Button variant="outline" size="lg" asChild className="text-lg px-8 py-6">
+                    <Button
+                      variant="outline"
+                      size="lg"
+                      asChild
+                      className="text-lg px-8 py-6"
+                    >
                       <Link href="/auth/signin">Sign In</Link>
                     </Button>
                   </>
@@ -114,7 +128,8 @@ export default async function Home() {
               </CardHeader>
               <CardContent>
                 <CardDescription className="text-base">
-                  Intuitive interface makes creating your CV simple and fast. No design experience required.
+                  Intuitive interface makes creating your CV simple and fast. No
+                  design experience required.
                 </CardDescription>
               </CardContent>
             </Card>
@@ -128,7 +143,8 @@ export default async function Home() {
               </CardHeader>
               <CardContent>
                 <CardDescription className="text-base">
-                  Our templates are optimized for Applicant Tracking Systems to help you get noticed by employers.
+                  Our templates are optimized for Applicant Tracking Systems to
+                  help you get noticed by employers.
                 </CardDescription>
               </CardContent>
             </Card>
@@ -142,7 +158,8 @@ export default async function Home() {
               </CardHeader>
               <CardContent>
                 <CardDescription className="text-base">
-                  Download your CV as a high-quality PDF ready for printing or digital sharing.
+                  Download your CV as a high-quality PDF ready for printing or
+                  digital sharing.
                 </CardDescription>
               </CardContent>
             </Card>
@@ -151,7 +168,9 @@ export default async function Home() {
           {/* Stats Section */}
           <section className="grid md:grid-cols-3 gap-8 mb-20">
             <div className="text-center">
-              <div className="text-4xl font-bold text-primary mb-2">10,000+</div>
+              <div className="text-4xl font-bold text-primary mb-2">
+                10,000+
+              </div>
               <div className="text-muted-foreground">CVs Created</div>
             </div>
             <div className="text-center">
@@ -168,9 +187,12 @@ export default async function Home() {
           <section className="text-center">
             <Card className="max-w-2xl mx-auto">
               <CardHeader>
-                <CardTitle className="text-3xl mb-4">Ready to Build Your CV?</CardTitle>
+                <CardTitle className="text-3xl mb-4">
+                  Ready to Build Your CV?
+                </CardTitle>
                 <CardDescription className="text-lg">
-                  Join thousands of professionals who have landed their dream jobs with our CV builder.
+                  Join thousands of professionals who have landed their dream
+                  jobs with our CV builder.
                 </CardDescription>
               </CardHeader>
               <CardContent>

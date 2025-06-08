@@ -25,12 +25,15 @@ export default function SEOOptimizations() {
         preloadLink.parentNode.removeChild(preloadLink);
       }
     };
-  }, []);
-  // Track page views
+  }, []); // Track page views
   useEffect(() => {
     const gaId = process.env.NEXT_PUBLIC_GA_ID;
-    if (typeof window !== "undefined" && (window as any).gtag && gaId) {
-      (window as any).gtag("config", gaId, {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const windowWithGtag = window as Window & {
+      gtag?: (...args: any[]) => void;
+    };
+    if (typeof window !== "undefined" && windowWithGtag.gtag && gaId) {
+      windowWithGtag.gtag("config", gaId, {
         page_path: pathname,
       });
     }

@@ -38,8 +38,9 @@ export default async function CVDashboard() {
 
         {cvs.length === 0 ? (
           <div className="text-center py-12">
+            {" "}
             <div className="text-gray-500 text-lg">
-              You haven't created any CVs yet.
+              You haven&apos;t created any CVs yet.
             </div>
             <Link
               href="/cv/create"

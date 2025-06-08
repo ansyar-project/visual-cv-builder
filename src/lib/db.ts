@@ -1,23 +1,52 @@
 import { prisma } from "./prisma";
 import bcrypt from "bcryptjs";
-import { Prisma } from "@prisma/client";
 
 // Types for better type safety
 export type CVData = {
   title: string;
-  personalInfo?: any;
-  summary?: any;
-  experience?: any[];
-  education?: any[];
-  skills?: any[];
+  personalInfo?: {
+    name: string;
+    email: string;
+    phone: string;
+    location: string;
+  };
+  summary?: string;
+  experience?: Array<{
+    position: string;
+    company: string;
+    duration: string;
+    description: string;
+  }>;
+  education?: Array<{
+    degree: string;
+    institution: string;
+    year: string;
+    description: string;
+  }>;
+  skills?: string[];
 };
 
 export type CVContent = {
-  personalInfo?: any;
-  summary?: any;
-  experience?: any[];
-  education?: any[];
-  skills?: any[];
+  personalInfo?: {
+    name: string;
+    email: string;
+    phone: string;
+    location: string;
+  };
+  summary?: string;
+  experience?: Array<{
+    position: string;
+    company: string;
+    duration: string;
+    description: string;
+  }>;
+  education?: Array<{
+    degree: string;
+    institution: string;
+    year: string;
+    description: string;
+  }>;
+  skills?: string[];
 };
 
 // User Operations

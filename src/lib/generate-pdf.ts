@@ -1,4 +1,4 @@
-import puppeteer, { Browser, Page } from "puppeteer";
+import puppeteer, { Browser } from "puppeteer";
 import path from "path";
 import fs from "fs/promises";
 
@@ -167,8 +167,8 @@ export async function generatePDFLegacy(
 }
 
 export async function generateCVHTML(
-  cvData: any,
-  template: string = "default"
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  cvData: any
 ): Promise<string> {
   // Sanitize input data
   const sanitizeText = (text: string) =>
@@ -403,22 +403,28 @@ export async function generateCVHTML(
         cvData.experience?.length
           ? `
         <div class="section">
-          <div class="section-title">Professional Experience</div>
-          ${cvData.experience
+          <div class="section-title">Professional Experience</div>          ${cvData.experience
             .map(
-              (exp: any) => `
+              (exp: {
+                position?: string;
+                title?: string;
+                company?: string;
+                duration?: string;
+                period?: string;
+                location?: string;
+                description?: string;
+              }) => `
             <div class="experience-item">
               <div class="item-title">${sanitizeText(
                 exp.position || exp.title || ""
               )}</div>
               <div class="item-subtitle">
-                ${sanitizeText(exp.company || "")} 
-                ${
-                  exp.duration || exp.period
-                    ? ` • ${sanitizeText(exp.duration || exp.period)}`
-                    : ""
-                }
-                ${exp.location ? ` • ${sanitizeText(exp.location)}` : ""}
+                ${sanitizeText(exp.company || "")}                ${
+                exp.duration || exp.period
+                  ? ` • ${sanitizeText(exp.duration || exp.period || "")}`
+                  : ""
+              }
+                ${exp.location ? ` • ${sanitizeText(exp.location || "")}` : ""}
               </div>
               ${
                 exp.description
@@ -443,20 +449,32 @@ export async function generateCVHTML(
           <div class="section-title">Education</div>
           ${cvData.education
             .map(
-              (edu: any) => `
+              (edu: {
+                degree?: string;
+                title?: string;
+                institution?: string;
+                school?: string;
+                year?: string;
+                period?: string;
+                location?: string;
+                gpa?: string;
+                description?: string;
+              }) => `
             <div class="education-item">
               <div class="item-title">${sanitizeText(
                 edu.degree || edu.title || ""
               )}</div>
               <div class="item-subtitle">
-                ${sanitizeText(edu.institution || edu.school || "")}
-                ${
-                  edu.year || edu.period
-                    ? ` • ${sanitizeText(edu.year || edu.period)}`
-                    : ""
-                }
-                ${edu.location ? ` • ${sanitizeText(edu.location)}` : ""}
-                ${edu.gpa ? ` • GPA: ${sanitizeText(edu.gpa)}` : ""}
+                ${sanitizeText(
+                  edu.institution || edu.school || ""
+                )}                ${
+                edu.year || edu.period
+                  ? ` • ${sanitizeText(edu.year || edu.period || "")}`
+                  : ""
+              }                ${
+                edu.location ? ` • ${sanitizeText(edu.location || "")}` : ""
+              }
+                ${edu.gpa ? ` • GPA: ${sanitizeText(edu.gpa || "")}` : ""}
               </div>
               ${
                 edu.description
@@ -500,18 +518,29 @@ export async function generateCVHTML(
           <div class="section-title">Certifications</div>
           ${cvData.certifications
             .map(
-              (cert: any) => `
+              (cert: {
+                name?: string;
+                title?: string;
+                issuer?: string;
+                organization?: string;
+                date?: string;
+                year?: string;
+                credentialId?: string;
+                url?: string;
+                description?: string;
+              }) => `
             <div class="education-item">
               <div class="item-title">${sanitizeText(
                 cert.name || cert.title || ""
               )}</div>
               <div class="item-subtitle">
-                ${sanitizeText(cert.issuer || cert.organization || "")}
-                ${
-                  cert.date || cert.year
-                    ? ` • ${sanitizeText(cert.date || cert.year)}`
-                    : ""
-                }
+                ${sanitizeText(
+                  cert.issuer || cert.organization || ""
+                )}                ${
+                cert.date || cert.year
+                  ? ` • ${sanitizeText(cert.date || cert.year || "")}`
+                  : ""
+              }
                 ${
                   cert.credentialId
                     ? ` • ID: ${sanitizeText(cert.credentialId)}`
@@ -534,7 +563,14 @@ export async function generateCVHTML(
           <div class="section-title">Notable Projects</div>
           ${cvData.projects
             .map(
-              (project: any) => `
+              (project: {
+                name?: string;
+                title?: string;
+                technologies?: string;
+                period?: string;
+                description?: string;
+                url?: string;
+              }) => `
             <div class="experience-item">
               <div class="item-title">${sanitizeText(
                 project.name || project.title || ""
@@ -570,6 +606,7 @@ export async function generateCVHTML(
 }
 
 // Utility function to validate CV data
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function validateCVData(cvData: any): {
   isValid: boolean;
   errors: string[];

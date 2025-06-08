@@ -5,10 +5,12 @@ import { sanitizeCVData, sanitizeText, sanitizeEmail } from "./sanitization";
 export interface ValidationResult {
   isValid: boolean;
   errors: string[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   sanitizedData?: any;
 }
 
 // Validate CV data structure and content
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function validateAndSanitizeCVData(data: any): ValidationResult {
   const errors: string[] = [];
 
@@ -60,7 +62,6 @@ export function validateAndSanitizeCVData(data: any): ValidationResult {
       errors,
     };
   }
-
   // Sanitize the data
   try {
     const sanitizedData = sanitizeCVData(data);
@@ -69,7 +70,7 @@ export function validateAndSanitizeCVData(data: any): ValidationResult {
       errors: [],
       sanitizedData,
     };
-  } catch (error) {
+  } catch {
     return {
       isValid: false,
       errors: ["Failed to sanitize data"],
@@ -78,6 +79,7 @@ export function validateAndSanitizeCVData(data: any): ValidationResult {
 }
 
 // Validate user registration data
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function validateUserRegistration(data: any): ValidationResult {
   const errors: string[] = [];
 
@@ -130,13 +132,12 @@ export function validateUserRegistration(data: any): ValidationResult {
       email: sanitizeEmail(data.email),
       password: data.password, // Don't sanitize password as it needs to be hashed
     };
-
     return {
       isValid: true,
       errors: [],
       sanitizedData,
     };
-  } catch (error) {
+  } catch {
     return {
       isValid: false,
       errors: ["Failed to sanitize data"],
@@ -145,14 +146,13 @@ export function validateUserRegistration(data: any): ValidationResult {
 }
 
 // Rate limiting validation
-export function validateRateLimit(identifier: string, action: string): boolean {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export function validateRateLimit(
+  _identifier: string,
+  _action: string
+): boolean {
   // This would typically check against a rate limiting store
   // For now, we'll implement a simple check
-  const rateLimits = {
-    cv_creation: { maxRequests: 10, windowMs: 60000 }, // 10 CVs per minute
-    pdf_generation: { maxRequests: 5, windowMs: 60000 }, // 5 PDFs per minute
-    user_registration: { maxRequests: 3, windowMs: 300000 }, // 3 registrations per 5 minutes
-  };
 
   // Implementation would depend on your rate limiting strategy
   // This is a placeholder for the actual implementation
@@ -170,7 +170,7 @@ export function validateCSP(content: string): boolean {
   // Decode URL encoding and HTML entities to catch encoded XSS
   try {
     testContent = decodeURIComponent(testContent);
-  } catch (e) {
+  } catch {
     // If decoding fails, continue with original
   }
 
@@ -205,5 +205,5 @@ export function validateCSP(content: string): boolean {
     /window\./i, // window object access
   ];
 
-  return !dangerousPatterns.some((pattern) => pattern.test(content));
+  return !dangerousPatterns.some((pattern) => pattern.test(testContent));
 }

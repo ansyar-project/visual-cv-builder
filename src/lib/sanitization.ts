@@ -32,7 +32,7 @@ export function sanitizeText(
   try {
     // Decode URL encoding
     sanitized = decodeURIComponent(sanitized);
-  } catch (e) {
+  } catch {
     // If decoding fails, continue with original string
   }
 
@@ -150,11 +150,13 @@ export function sanitizeUrl(url: string): string {
 }
 
 // Sanitize CV data object
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function sanitizeCVData(data: any): any {
   if (!data || typeof data !== "object") {
     return {};
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const sanitized: any = {};
 
   // Sanitize title
@@ -186,68 +188,98 @@ export function sanitizeCVData(data: any): any {
 
   // Sanitize experience array
   if (Array.isArray(data.experience)) {
-    sanitized.experience = data.experience.map((exp: any) => ({
-      position: sanitizeText(exp.position || "", { maxLength: 200 }),
-      company: sanitizeText(exp.company || "", { maxLength: 200 }),
-      duration: sanitizeText(exp.duration || "", { maxLength: 100 }),
-      description: sanitizeText(exp.description || "", {
-        maxLength: 1000,
-        allowHTML: true,
-        allowedTags: ["p", "br", "strong", "em", "ul", "ol", "li"],
-        allowedAttributes: {},
-      }),
-    }));
+    sanitized.experience = data.experience.map(
+      (exp: {
+        position?: string;
+        company?: string;
+        duration?: string;
+        description?: string;
+      }) => ({
+        position: sanitizeText(exp.position || "", { maxLength: 200 }),
+        company: sanitizeText(exp.company || "", { maxLength: 200 }),
+        duration: sanitizeText(exp.duration || "", { maxLength: 100 }),
+        description: sanitizeText(exp.description || "", {
+          maxLength: 1000,
+          allowHTML: true,
+          allowedTags: ["p", "br", "strong", "em", "ul", "ol", "li"],
+          allowedAttributes: {},
+        }),
+      })
+    );
   }
 
   // Sanitize education array
   if (Array.isArray(data.education)) {
-    sanitized.education = data.education.map((edu: any) => ({
-      degree: sanitizeText(edu.degree || "", { maxLength: 200 }),
-      institution: sanitizeText(edu.institution || "", { maxLength: 200 }),
-      year: sanitizeText(edu.year || "", { maxLength: 50 }),
-      description: sanitizeText(edu.description || "", {
-        maxLength: 1000,
-        allowHTML: true,
-        allowedTags: ["p", "br", "strong", "em", "ul", "ol", "li"],
-        allowedAttributes: {},
-      }),
-    }));
+    sanitized.education = data.education.map(
+      (edu: {
+        degree?: string;
+        institution?: string;
+        year?: string;
+        description?: string;
+      }) => ({
+        degree: sanitizeText(edu.degree || "", { maxLength: 200 }),
+        institution: sanitizeText(edu.institution || "", { maxLength: 200 }),
+        year: sanitizeText(edu.year || "", { maxLength: 50 }),
+        description: sanitizeText(edu.description || "", {
+          maxLength: 1000,
+          allowHTML: true,
+          allowedTags: ["p", "br", "strong", "em", "ul", "ol", "li"],
+          allowedAttributes: {},
+        }),
+      })
+    );
   }
 
   // Sanitize skills array
   if (Array.isArray(data.skills)) {
     sanitized.skills = data.skills
-      .map((skill: any) => sanitizeText(skill || "", { maxLength: 100 }))
+      .map((skill: string) => sanitizeText(skill || "", { maxLength: 100 }))
       .filter((skill: string) => skill.length > 0);
   }
 
   // Sanitize certifications array if present
   if (Array.isArray(data.certifications)) {
-    sanitized.certifications = data.certifications.map((cert: any) => ({
-      name: sanitizeText(cert.name || "", { maxLength: 200 }),
-      issuer: sanitizeText(cert.issuer || "", { maxLength: 200 }),
-      date: sanitizeText(cert.date || "", { maxLength: 50 }),
-      url: sanitizeUrl(cert.url || ""),
-    }));
+    sanitized.certifications = data.certifications.map(
+      (cert: {
+        name?: string;
+        issuer?: string;
+        date?: string;
+        url?: string;
+      }) => ({
+        name: sanitizeText(cert.name || "", { maxLength: 200 }),
+        issuer: sanitizeText(cert.issuer || "", { maxLength: 200 }),
+        date: sanitizeText(cert.date || "", { maxLength: 50 }),
+        url: sanitizeUrl(cert.url || ""),
+      })
+    );
   }
 
   // Sanitize projects array if present
   if (Array.isArray(data.projects)) {
-    sanitized.projects = data.projects.map((proj: any) => ({
-      name: sanitizeText(proj.name || "", { maxLength: 200 }),
-      description: sanitizeText(proj.description || "", {
-        maxLength: 1000,
-        allowHTML: true,
-        allowedTags: ["p", "br", "strong", "em", "ul", "ol", "li"],
-        allowedAttributes: {},
-      }),
-      technologies: Array.isArray(proj.technologies)
-        ? proj.technologies
-            .map((tech: any) => sanitizeText(tech || "", { maxLength: 50 }))
-            .filter((tech: string) => tech.length > 0)
-        : [],
-      url: sanitizeUrl(proj.url || ""),
-    }));
+    sanitized.projects = data.projects.map(
+      (proj: {
+        name?: string;
+        description?: string;
+        technologies?: string[];
+        url?: string;
+      }) => ({
+        name: sanitizeText(proj.name || "", { maxLength: 200 }),
+        description: sanitizeText(proj.description || "", {
+          maxLength: 1000,
+          allowHTML: true,
+          allowedTags: ["p", "br", "strong", "em", "ul", "ol", "li"],
+          allowedAttributes: {},
+        }),
+        technologies: Array.isArray(proj.technologies)
+          ? proj.technologies
+              .map((tech: string) =>
+                sanitizeText(tech || "", { maxLength: 50 })
+              )
+              .filter((tech: string) => tech.length > 0)
+          : [],
+        url: sanitizeUrl(proj.url || ""),
+      })
+    );
   }
 
   return sanitized;

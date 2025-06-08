@@ -4,6 +4,7 @@ import "./globals.css";
 import SessionProvider from "@/components/SessionProvider";
 import Navbar from "@/components/Navbar";
 import SEOOptimizations from "@/components/SEOOptimizations";
+import ErrorBoundary from "@/components/ErrorBoundary";
 import { GoogleAnalytics } from "@next/third-parties/google";
 
 const geistSans = Geist({
@@ -176,8 +177,10 @@ export default function RootLayout({
       >
         <SEOOptimizations />
         <SessionProvider>
-          <Navbar />
-          <main>{children}</main>
+          <ErrorBoundary>
+            <Navbar />
+            <main>{children}</main>
+          </ErrorBoundary>
         </SessionProvider>
         <GoogleAnalytics
           gaId={process.env.NEXT_PUBLIC_GA_ID || "G-XXXXXXXXXX"}

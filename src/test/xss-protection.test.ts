@@ -4,11 +4,7 @@ import {
   validateUserRegistration,
   validateCSP,
 } from "../lib/validation";
-import {
-  sanitizeCVData,
-  sanitizeText,
-  sanitizeEmail,
-} from "../lib/sanitization";
+import { sanitizeText, sanitizeEmail } from "../lib/sanitization";
 
 // Common XSS attack vectors for testing
 const XSS_PAYLOADS = [

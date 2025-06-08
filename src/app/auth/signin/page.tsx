@@ -40,7 +40,7 @@ export default function SignIn() {
       } else {
         router.push("/cv");
       }
-    } catch (error) {
+    } catch {
       setError("An error occurred. Please try again.");
     } finally {
       setLoading(false);
@@ -117,8 +117,9 @@ export default function SignIn() {
             </Button>
 
             <div className="text-center text-sm">
+              {" "}
               <span className="text-muted-foreground">
-                Don't have an account?{" "}
+                Don&apos;t have an account?{" "}
               </span>
               <Link
                 href="/auth/signup"

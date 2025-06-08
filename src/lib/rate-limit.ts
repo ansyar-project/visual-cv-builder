@@ -29,7 +29,8 @@ const redis = process.env.UPSTASH_REDIS_REST_URL
       url: process.env.UPSTASH_REDIS_REST_URL!,
       token: process.env.UPSTASH_REDIS_REST_TOKEN!,
     })
-  : (new MemoryStore() as any);
+  : // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (new MemoryStore() as any);
 
 // Different rate limits for different endpoints
 export const rateLimiters = {
@@ -105,9 +106,7 @@ export async function applyRateLimit(
   const identifier = customIdentifier || getClientIdentifier(request);
 
   try {
-    const { success, limit, remaining, reset } = await limiter.limit(
-      identifier
-    );
+    const { success, limit, reset } = await limiter.limit(identifier);
 
     if (!success) {
       return NextResponse.json(
@@ -141,7 +140,7 @@ export async function applyRateLimit(
 
 // Higher-order function to wrap API routes with rate limiting
 export function withRateLimit(
-  handler: (request: NextRequest, ...args: any[]) => Promise<NextResponse>,
+  handler: (request: NextRequest, ...args: unknown[]) => Promise<NextResponse>,
   limiter: Ratelimit,
   options?: {
     customIdentifier?: (request: NextRequest) => string;
@@ -150,7 +149,7 @@ export function withRateLimit(
 ) {
   return async (
     request: NextRequest,
-    ...args: any[]
+    ...args: unknown[]
   ): Promise<NextResponse> => {
     // Apply rate limiting
     const identifier = options?.customIdentifier

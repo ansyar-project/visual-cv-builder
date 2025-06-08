@@ -10,7 +10,6 @@ import {
   GraduationCap,
   Wrench,
 } from "lucide-react";
-import { sanitizeText } from "@/lib/sanitization";
 
 interface CVPreviewProps {
   data: {
@@ -38,12 +37,6 @@ interface CVPreviewProps {
 }
 
 export default function CVPreview({ data }: CVPreviewProps) {
-  // Sanitize data for safe display
-  const sanitizeDisplayText = (text: string | undefined | null) => {
-    if (!text) return "";
-    return sanitizeText(text, { allowHTML: false });
-  };
-
   const filteredExperience = data.experience.filter(
     (exp) => exp.position || exp.company || exp.duration || exp.description
   );
