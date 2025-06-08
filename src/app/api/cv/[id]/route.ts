@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cvOperations } from "@/lib/db";
 import { getCurrentUser } from "@/lib/session";
+import { sanitizeCVData } from "@/lib/sanitization";
 
 // GET - Fetch specific CV
 export async function GET(
@@ -43,7 +44,6 @@ export async function PUT(
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-
     const cvData = await request.json();
 
     if (!cvData.title) {
@@ -53,13 +53,16 @@ export async function PUT(
       );
     }
 
+    // Sanitize input data to prevent XSS attacks
+    const sanitizedData = sanitizeCVData(cvData);
+
     const cv = await cvOperations.update(id, user.id, {
-      title: cvData.title,
-      personalInfo: cvData.personalInfo,
-      summary: cvData.summary,
-      experience: cvData.experience,
-      education: cvData.education,
-      skills: cvData.skills,
+      title: sanitizedData.title,
+      personalInfo: sanitizedData.personalInfo,
+      summary: sanitizedData.summary,
+      experience: sanitizedData.experience,
+      education: sanitizedData.education,
+      skills: sanitizedData.skills,
     });
 
     return NextResponse.json(cv);

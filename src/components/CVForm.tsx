@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import CVPreview from "./CVPreview";
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Trash2, Save, FileDown, AlertCircle } from "lucide-react";
+import { sanitizeCVData } from "@/lib/sanitization";
 
 interface CVData {
   title: string;
@@ -53,7 +54,33 @@ export default function CVForm({ initialData }: CVFormProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  // Refs for scroll synchronization
+  const formRef = useRef<HTMLDivElement>(null);
+  const previewRef = useRef<HTMLDivElement>(null);
+  const isScrollingSyncRef = useRef(false);
+  // Dynamic height calculation
+  const [containerHeight, setContainerHeight] = useState("calc(100vh - 12rem)");
 
+  useEffect(() => {
+    const updateHeight = () => {
+      const navbar = document.querySelector("nav");
+      const navbarHeight = navbar?.offsetHeight || 64; // fallback to 4rem
+      const pageHeaderHeight = 120; // Approximate header height
+      const padding = 32; // Additional padding
+
+      // Mobile adjustments
+      const isMobile = window.innerWidth < 1280; // xl breakpoint
+      const mobileOffset = isMobile ? 40 : 0; // Extra space for mobile
+
+      const totalOffset =
+        navbarHeight + pageHeaderHeight + padding + mobileOffset;
+      setContainerHeight(`calc(100vh - ${totalOffset}px)`);
+    };
+
+    updateHeight();
+    window.addEventListener("resize", updateHeight);
+    return () => window.removeEventListener("resize", updateHeight);
+  }, []);
   const [cvData, setCvData] = useState<CVData>({
     title: initialData?.title || "",
     personalInfo: {
@@ -71,6 +98,52 @@ export default function CVForm({ initialData }: CVFormProps) {
     ],
     skills: initialData?.content?.skills || [""],
   });
+  // Scroll synchronization effect
+  useEffect(() => {
+    const formElement = formRef.current;
+    const previewElement = previewRef.current;
+
+    if (!formElement || !previewElement) return;
+    const syncScroll = (source: HTMLElement, target: HTMLElement) => {
+      if (isScrollingSyncRef.current) return;
+
+      isScrollingSyncRef.current = true;
+
+      const sourceMaxScroll = source.scrollHeight - source.clientHeight;
+      const targetMaxScroll = target.scrollHeight - target.clientHeight;
+
+      // Don't sync if either container doesn't need scrolling
+      if (sourceMaxScroll <= 0 || targetMaxScroll <= 0) {
+        isScrollingSyncRef.current = false;
+        return;
+      }
+
+      const sourceScrollPercentage = source.scrollTop / sourceMaxScroll;
+      const targetScrollPosition = Math.min(
+        sourceScrollPercentage * targetMaxScroll,
+        targetMaxScroll
+      );
+
+      target.scrollTop = targetScrollPosition;
+
+      setTimeout(() => {
+        isScrollingSyncRef.current = false;
+      }, 50); // Reduced timeout for smoother sync
+    };
+
+    const handleFormScroll = () => syncScroll(formElement, previewElement);
+    const handlePreviewScroll = () => syncScroll(previewElement, formElement);
+
+    formElement.addEventListener("scroll", handleFormScroll, { passive: true });
+    previewElement.addEventListener("scroll", handlePreviewScroll, {
+      passive: true,
+    });
+
+    return () => {
+      formElement.removeEventListener("scroll", handleFormScroll);
+      previewElement.removeEventListener("scroll", handlePreviewScroll);
+    };
+  }, []);
 
   const addExperience = () => {
     setCvData((prev) => ({
@@ -144,12 +217,14 @@ export default function CVForm({ initialData }: CVFormProps) {
       skills: prev.skills.map((skill, i) => (i === index ? value : skill)),
     }));
   };
-
   const handleSave = async () => {
     setLoading(true);
     setError("");
 
     try {
+      // Sanitize data before sending to server
+      const sanitizedData = sanitizeCVData(cvData);
+
       const url = initialData ? `/api/cv/${initialData.id}` : "/api/cv";
       const method = initialData ? "PUT" : "POST";
 
@@ -158,7 +233,7 @@ export default function CVForm({ initialData }: CVFormProps) {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(cvData),
+        body: JSON.stringify(sanitizedData),
       });
 
       if (response.ok) {
@@ -173,12 +248,14 @@ export default function CVForm({ initialData }: CVFormProps) {
       setLoading(false);
     }
   };
-
   const handleGeneratePDF = async () => {
     setLoading(true);
     setError("");
 
     try {
+      // Sanitize data before sending to server
+      const sanitizedData = sanitizeCVData(cvData);
+
       const url = initialData
         ? `/api/cv/${initialData.id}/generate`
         : "/api/cv/generate";
@@ -188,7 +265,7 @@ export default function CVForm({ initialData }: CVFormProps) {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(cvData),
+        body: JSON.stringify(sanitizedData),
       });
 
       if (response.ok) {
@@ -205,9 +282,13 @@ export default function CVForm({ initialData }: CVFormProps) {
     }
   };
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-none mx-auto p-6">
+    <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 max-w-none mx-auto px-2 min-h-screen">
       {/* Form Section */}
-      <div className="space-y-6">
+      <div
+        ref={formRef}
+        className="space-y-6 overflow-y-auto pr-4 scroll-sync-container"
+        style={{ maxHeight: containerHeight }}
+      >
         {/* Basic Info Card */}
         <Card>
           <CardHeader>
@@ -577,12 +658,19 @@ export default function CVForm({ initialData }: CVFormProps) {
             {loading ? "Generating..." : "Generate PDF"}
           </Button>
         </div>
-      </div>
-
+      </div>{" "}
       {/* Preview Section */}
-      <div className="bg-background rounded-lg border p-6">
-        <h2 className="text-xl font-semibold mb-4">Preview</h2>
-        <CVPreview data={cvData} />
+      <div
+        ref={previewRef}
+        className="bg-background rounded-lg border overflow-hidden flex flex-col"
+        style={{ maxHeight: containerHeight }}
+      >
+        <h2 className="text-xl font-semibold p-4 pb-3 bg-background border-b">
+          Preview
+        </h2>
+        <div className="flex-1 p-4 pt-3 overflow-y-auto">
+          <CVPreview data={cvData} />
+        </div>
       </div>
     </div>
   );

@@ -115,14 +115,23 @@ GET /api/cv/[id]/download
 
 ---
 
-## 🚀 Future Enhancements
+## 🚀 Future Enhancement Roadmap
+- Phase 1 (Immediate)
+1. Complete PDF generation with Puppeteer
+2. Add input sanitization for XSS protection
+3. Implement rate limiting for API routes
+4. Add proper error boundaries and loading states
+- Phase 2 (Short-term)
+1. Multiple CV templates system
+2. File upload for profile pictures
+3. CV sharing via public links
+4. Export formats (HTML, Markdown)
+- Phase 3 (Long-term)
+1. AI-assisted content generation
+2. Cover letter generator
+3. Analytics dashboard for CV views
+4. Mobile app with React Native
 
-- Add more templates and themes
-- AI-assisted CV content generation
-- Public CV link sharing
-- Cover letter generator
-- Mobile-responsive CV formats
-- Export as HTML or Markdown
 
 ---
 

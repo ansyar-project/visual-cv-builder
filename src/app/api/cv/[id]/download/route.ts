@@ -18,28 +18,72 @@ export async function GET(
 
     const cv = await cvOperations.findByIdAndUserId(id, user.id);
 
-    if (!cv || !cv.filePath) {
+    if (!cv) {
       return NextResponse.json({ error: "CV not found" }, { status: 404 });
     }
 
-    const filePath = path.join(process.cwd(), "public", cv.filePath);
+    if (!cv.filePath) {
+      return NextResponse.json(
+        {
+          error: "PDF not generated",
+          message: "Please generate the PDF first",
+        },
+        { status: 404 }
+      );
+    }
+
+    // Security: Validate file path to prevent directory traversal
+    const normalizedPath = path.normalize(cv.filePath);
+    if (
+      !normalizedPath.startsWith("/cv-files/") ||
+      normalizedPath.includes("..")
+    ) {
+      return NextResponse.json({ error: "Invalid file path" }, { status: 400 });
+    }
+
+    const filePath = path.join(process.cwd(), "public", normalizedPath);
 
     try {
+      // Check if file exists and get stats
+      const stats = await fs.stat(filePath);
+
+      if (!stats.isFile()) {
+        return NextResponse.json({ error: "File not found" }, { status: 404 });
+      }
+
       const fileBuffer = await fs.readFile(filePath);
+
+      // Generate safe filename for download
+      const safeTitle = cv.title.replace(/[^a-zA-Z0-9\-_\s]/g, "").trim();
+      const downloadFilename = `${safeTitle || "CV"}.pdf`;
 
       return new NextResponse(fileBuffer, {
         headers: {
           "Content-Type": "application/pdf",
-          "Content-Disposition": `attachment; filename="${cv.title}.pdf"`,
+          "Content-Disposition": `attachment; filename="${downloadFilename}"`,
+          "Content-Length": stats.size.toString(),
+          "Cache-Control": "private, no-cache, no-store, must-revalidate",
+          Pragma: "no-cache",
+          Expires: "0",
         },
       });
     } catch (fileError) {
-      return NextResponse.json({ error: "File not found" }, { status: 404 });
+      console.error("File read error:", fileError);
+      return NextResponse.json(
+        {
+          error: "File not found",
+          message: "The PDF file may have been deleted or moved",
+        },
+        { status: 404 }
+      );
     }
   } catch (error) {
     console.error("Error downloading CV:", error);
     return NextResponse.json(
-      { error: "Internal server error" },
+      {
+        error: "Internal server error",
+        message: "An unexpected error occurred while downloading the CV",
+      },
       { status: 500 }
     );
   }

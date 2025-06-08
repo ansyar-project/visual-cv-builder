@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cvOperations } from "@/lib/db";
 import { getCurrentUser } from "@/lib/session";
-import { generatePDF, generateCVHTML } from "@/lib/generate-pdf";
+import {
+  generatePDF,
+  generateCVHTML,
+  validateCVData,
+} from "@/lib/generate-pdf";
+import { sanitizeCVData } from "@/lib/sanitization";
 import { v4 as uuidv4 } from "uuid";
 
 // POST - Generate PDF for CV
@@ -18,30 +23,70 @@ export async function POST(
     }
 
     const cv = await cvOperations.findByIdAndUserId(id, user.id);
-
     if (!cv) {
       return NextResponse.json({ error: "CV not found" }, { status: 404 });
     }
 
-    // Generate HTML from CV data
-    const htmlContent = await generateCVHTML(cv.content, cv.template);
+    // Sanitize CV data before processing
+    const sanitizedContent = sanitizeCVData(cv.content);
+
+    // Validate CV data before generation
+    const validation = validateCVData(sanitizedContent);
+    if (!validation.isValid) {
+      return NextResponse.json(
+        {
+          error: "Invalid CV data",
+          details: validation.errors,
+        },
+        { status: 400 }
+      );
+    }
+
+    // Get generation options from request body
+    const body = await request.json().catch(() => ({}));
+    const options = {
+      format: body.format || "A4",
+      quality: body.quality || "high",
+      template: cv.template || "default",
+      includeBackground: body.includeBackground !== false,
+    }; // Generate HTML from CV data using sanitized content
+    const htmlContent = await generateCVHTML(sanitizedContent, cv.template);
 
     // Generate unique filename
     const filename = `cv-${cv.id}-${uuidv4()}`;
 
-    // Generate PDF
-    const filePath = await generatePDF(htmlContent, filename); // Update CV with file path
-    await cvOperations.updateFilePath(cv.id, filePath);
+    // Generate PDF with enhanced options
+    const result = await generatePDF(htmlContent, filename, options);
+
+    if (!result.success) {
+      console.error("PDF generation failed:", result.error);
+      return NextResponse.json(
+        { error: result.error || "Failed to generate PDF" },
+        { status: 500 }
+      );
+    }
+
+    // Update CV with file path
+    if (result.filePath) {
+      await cvOperations.updateFilePath(cv.id, result.filePath);
+    }
 
     return NextResponse.json({
       message: "PDF generated successfully",
       downloadUrl: `/api/cv/${cv.id}/download`,
-      filePath: filePath,
+      filePath: result.filePath,
+      fileSize: result.fileSize,
+      generationTime: result.generationTime,
+      quality: options.quality,
+      format: options.format,
     });
   } catch (error) {
     console.error("Error generating PDF:", error);
     return NextResponse.json(
-      { error: "Failed to generate PDF" },
+      {
+        error: "Failed to generate PDF",
+        details: error instanceof Error ? error.message : "Unknown error",
+      },
       { status: 500 }
     );
   }

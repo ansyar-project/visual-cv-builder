@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/session";
-import { generatePDF, generateCVHTML } from "@/lib/generate-pdf";
+import {
+  generatePDFLegacy,
+  generateCVHTML,
+  validateCVData,
+} from "@/lib/generate-pdf";
+import { sanitizeCVData } from "@/lib/sanitization";
 import { v4 as uuidv4 } from "uuid";
 
 // POST - Generate PDF from CV data (without saving to database)
@@ -11,7 +16,6 @@ export async function POST(request: NextRequest) {
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-
     const cvData = await request.json();
 
     if (!cvData.title) {
@@ -21,14 +25,29 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Sanitize input data to prevent XSS attacks
+    const sanitizedData = sanitizeCVData(cvData);
+
+    // Validate CV data before generation
+    const validation = validateCVData(sanitizedData);
+    if (!validation.isValid) {
+      return NextResponse.json(
+        {
+          error: "Invalid CV data",
+          details: validation.errors,
+        },
+        { status: 400 }
+      );
+    }
+
     // Generate HTML from CV data
-    const htmlContent = await generateCVHTML(cvData);
+    const htmlContent = await generateCVHTML(sanitizedData);
 
     // Generate unique filename
     const filename = `cv-preview-${uuidv4()}`;
 
     // Generate PDF
-    const filePath = await generatePDF(htmlContent, filename);
+    const filePath = await generatePDFLegacy(htmlContent, filename);
 
     // Return the file path for immediate download
     return NextResponse.json({

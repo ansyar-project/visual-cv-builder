@@ -10,6 +10,7 @@ import {
   GraduationCap,
   Wrench,
 } from "lucide-react";
+import { sanitizeText } from "@/lib/sanitization";
 
 interface CVPreviewProps {
   data: {
@@ -37,6 +38,12 @@ interface CVPreviewProps {
 }
 
 export default function CVPreview({ data }: CVPreviewProps) {
+  // Sanitize data for safe display
+  const sanitizeDisplayText = (text: string | undefined | null) => {
+    if (!text) return "";
+    return sanitizeText(text, { allowHTML: false });
+  };
+
   const filteredExperience = data.experience.filter(
     (exp) => exp.position || exp.company || exp.duration || exp.description
   );
@@ -46,11 +53,10 @@ export default function CVPreview({ data }: CVPreviewProps) {
   );
 
   const filteredSkills = data.skills.filter((skill) => skill.trim());
-
   return (
-    <div className="w-full" style={{ aspectRatio: "1 / 1.414" }}>
-      <Card className="h-full overflow-y-auto">
-        <CardContent className="p-8 h-full">
+    <div className="w-full max-w-full mx-auto">
+      <Card className="h-full shadow-lg overflow-hidden">
+        <CardContent className="p-4 sm:p-6 lg:p-8">
           {/* Header */}
           <div className="text-center border-b pb-6 mb-8">
             <h1 className="text-4xl font-bold mb-3">

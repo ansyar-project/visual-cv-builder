@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cvOperations } from "@/lib/db";
 import { getCurrentUser } from "@/lib/session";
+import { sanitizeCVData } from "@/lib/sanitization";
 
 // GET - Fetch user's CVs
 export async function GET() {
@@ -31,7 +32,6 @@ export async function POST(request: NextRequest) {
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-
     const cvData = await request.json();
 
     if (!cvData.title) {
@@ -40,13 +40,17 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
+
+    // Sanitize input data to prevent XSS attacks
+    const sanitizedData = sanitizeCVData(cvData);
+
     const cv = await cvOperations.create(user.id, {
-      title: cvData.title,
-      personalInfo: cvData.personalInfo,
-      summary: cvData.summary,
-      experience: cvData.experience,
-      education: cvData.education,
-      skills: cvData.skills,
+      title: sanitizedData.title,
+      personalInfo: sanitizedData.personalInfo,
+      summary: sanitizedData.summary,
+      experience: sanitizedData.experience,
+      education: sanitizedData.education,
+      skills: sanitizedData.skills,
     });
 
     return NextResponse.json(cv, { status: 201 });

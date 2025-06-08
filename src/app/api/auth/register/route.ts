@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { userOperations } from "@/lib/db";
+import { sanitizeText, sanitizeEmail } from "@/lib/sanitization";
 
 export async function POST(request: NextRequest) {
   try {
@@ -10,20 +11,31 @@ export async function POST(request: NextRequest) {
         { error: "Missing required fields" },
         { status: 400 }
       );
-    } // Check if user already exists
-    const userExists = await userOperations.existsByEmail(email);
+    }
+
+    // Sanitize input data to prevent XSS attacks
+    const sanitizedName = sanitizeText(name, { maxLength: 100 });
+    const sanitizedEmail = sanitizeEmail(email);
+
+    if (!sanitizedName || !sanitizedEmail) {
+      return NextResponse.json(
+        { error: "Invalid input data" },
+        { status: 400 }
+      );
+    }
+
+    // Check if user already exists
+    const userExists = await userOperations.existsByEmail(sanitizedEmail);
 
     if (userExists) {
       return NextResponse.json(
         { error: "User already exists" },
         { status: 400 }
       );
-    }
-
-    // Create user
+    } // Create user
     const user = await userOperations.create({
-      name,
-      email,
+      name: sanitizedName,
+      email: sanitizedEmail,
       password,
     });
 
