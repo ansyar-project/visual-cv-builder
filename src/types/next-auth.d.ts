@@ -1,5 +1,29 @@
 // next-auth type declarations
 declare module "next-auth" {
+  export interface AuthOptions {
+    adapter?: any;
+    providers: any[];
+    session?: {
+      strategy?: "jwt" | "database";
+      maxAge?: number;
+      updateAge?: number;
+    };
+    pages?: {
+      signIn?: string;
+      signOut?: string;
+      error?: string;
+      verifyRequest?: string;
+      newUser?: string;
+    };
+    callbacks?: {
+      jwt?: (params: { token: any; user?: any }) => any;
+      session?: (params: { session: any; token: any }) => any;
+    };
+    [key: string]: any;
+  }
+
+  export type NextAuthOptions = AuthOptions;
+
   interface Session {
     user: {
       id: string;

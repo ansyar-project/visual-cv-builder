@@ -8,11 +8,5 @@ interface ErrorPageProps {
 }
 
 export default function Error({ error, reset }: ErrorPageProps) {
-  return (
-    <CVErrorFallback
-      error={error}
-      resetErrorBoundary={reset}
-      operation="editing"
-    />
-  );
+  return <CVErrorFallback error={error} resetError={reset} />;
 }
