@@ -30,11 +30,13 @@ FROM base AS builder
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 ENV NODE_ENV=production
+RUN corepack enable && corepack prepare pnpm@latest --activate
 RUN pnpm build
 
 # ---- Production image ----
 FROM base AS runner
 ENV NODE_ENV=production
+RUN corepack enable && corepack prepare pnpm@latest --activate
 
 # Copy built app and node_modules
 COPY --from=builder /app/.next ./.next
