@@ -1,8 +1,10 @@
 // next-auth type declarations
+import type { Adapter } from "next-auth/adapters";
+import type { Provider } from "next-auth/providers";
 declare module "next-auth" {
   export interface AuthOptions {
-    adapter?: any;
-    providers: any[];
+    adapter?: Adapter;
+    providers: Provider[];
     session?: {
       strategy?: "jwt" | "database";
       maxAge?: number;
@@ -16,10 +18,16 @@ declare module "next-auth" {
       newUser?: string;
     };
     callbacks?: {
-      jwt?: (params: { token: any; user?: any }) => any;
-      session?: (params: { session: any; token: any }) => any;
+      jwt?: (params: {
+        token: Record<string, unknown>;
+        user?: { id: string };
+      }) => unknown;
+      session?: (params: {
+        session: { user?: { id?: string } } & Record<string, unknown>;
+        token: Record<string, unknown>;
+      }) => unknown;
     };
-    [key: string]: any;
+    [key: string]: unknown;
   }
 
   export type NextAuthOptions = AuthOptions;

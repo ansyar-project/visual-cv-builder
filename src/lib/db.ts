@@ -9,6 +9,8 @@ export type CVData = {
     email: string;
     phone: string;
     location: string;
+    linkedin: string;
+    github: string;
   };
   summary?: string;
   experience?: Array<{
@@ -32,6 +34,8 @@ export type CVContent = {
     email: string;
     phone: string;
     location: string;
+    linkedin: string;
+    github: string;
   };
   summary?: string;
   experience?: Array<{

@@ -170,6 +170,10 @@ export async function generateCVHTML(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   cvData: any
 ): Promise<string> {
+  // Import theme utilities
+  const { getThemeColors } = await import("./cv-themes");
+  const themeColors = getThemeColors(cvData.theme || "professional-blue");
+
   // Sanitize input data
   const sanitizeText = (text: string) =>
     text ? text.replace(/[<>]/g, "") : "";
@@ -202,13 +206,14 @@ export async function generateCVHTML(
           background: white;
           font-size: 14px;
         }
-        
-        .header {
+          .header {
           text-align: center;
-          border-bottom: 3px solid #3498db;
+          border-bottom: 3px solid ${themeColors.primary};
           padding-bottom: 20px;
           margin-bottom: 30px;
-          background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+          background: linear-gradient(135deg, ${
+            themeColors.gradientStart
+          } 0%, ${themeColors.gradientEnd} 100%);
           padding: 30px 20px 20px;
           border-radius: 8px 8px 0 0;
         }
@@ -216,14 +221,14 @@ export async function generateCVHTML(
         .name {
           font-size: 2.5em;
           font-weight: 700;
-          color: #2c3e50;
+          color: ${themeColors.textPrimary};
           margin-bottom: 10px;
           letter-spacing: -0.5px;
         }
         
         .contact-info {
           font-size: 1.1em;
-          color: #7f8c8d;
+          color: ${themeColors.textSecondary};
           display: flex;
           justify-content: center;
           flex-wrap: wrap;
@@ -244,8 +249,8 @@ export async function generateCVHTML(
         .section-title {
           font-size: 1.4em;
           font-weight: 600;
-          color: #2c3e50;
-          border-bottom: 2px solid #3498db;
+          color: ${themeColors.textPrimary};
+          border-bottom: 2px solid ${themeColors.primary};
           padding-bottom: 8px;
           margin-bottom: 20px;
           position: relative;
@@ -258,27 +263,27 @@ export async function generateCVHTML(
           left: 0;
           width: 50px;
           height: 2px;
-          background: #e74c3c;
+          background: ${themeColors.accent};
         }
         
         .experience-item, .education-item {
           margin-bottom: 25px;
           padding: 20px;
-          background: #f8f9fa;
+          background: ${themeColors.background};
           border-radius: 8px;
-          border-left: 4px solid #3498db;
+          border-left: 4px solid ${themeColors.primary};
           box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         
         .item-title {
           font-weight: 600;
           font-size: 1.2em;
-          color: #2c3e50;
+          color: ${themeColors.textPrimary};
           margin-bottom: 5px;
         }
         
         .item-subtitle {
-          color: #7f8c8d;
+          color: ${themeColors.textSecondary};
           font-style: italic;
           margin-bottom: 10px;
           font-size: 1em;
@@ -291,14 +296,14 @@ export async function generateCVHTML(
         }
         
         .summary {
-          background: #f8f9fa;
+          background: ${themeColors.background};
           padding: 25px;
           border-radius: 8px;
-          border-left: 4px solid #27ae60;
+          border-left: 4px solid ${themeColors.accent};
           font-style: italic;
           font-size: 1.05em;
           line-height: 1.7;
-          color: #2c3e50;
+          color: ${themeColors.textPrimary};
         }
         
         .skills-list {
@@ -309,16 +314,15 @@ export async function generateCVHTML(
         }
         
         .skill-item {
-          background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+          background: ${themeColors.primary};
           color: white;
           padding: 8px 16px;
           border-radius: 20px;
           font-size: 0.9em;
           font-weight: 500;
-          box-shadow: 0 2px 4px rgba(52, 152, 219, 0.3);
+          box-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
-        
-        /* Print optimizations */
+          /* Print optimizations */
         @media print {
           body {
             font-size: 12px;
@@ -327,7 +331,7 @@ export async function generateCVHTML(
           
           .header {
             background: none !important;
-            border-bottom: 2px solid #3498db;
+            border-bottom: 2px solid ${themeColors.primary};
           }
           
           .experience-item, .education-item {
@@ -338,11 +342,11 @@ export async function generateCVHTML(
           
           .summary {
             background: none !important;
-            border: 1px solid #27ae60;
+            border: 1px solid ${themeColors.accent};
           }
           
           .skill-item {
-            background: #3498db !important;
+            background: ${themeColors.primary} !important;
             box-shadow: none !important;
           }
         }
@@ -370,12 +374,25 @@ export async function generateCVHTML(
                   cvData.personalInfo.phone
                 )}</span>`
               : ""
+          }          ${
+    cvData.personalInfo?.location
+      ? `<span class="contact-item">📍 ${sanitizeText(
+          cvData.personalInfo.location
+        )}</span>`
+      : ""
+  }
+          ${
+            cvData.personalInfo?.linkedin
+              ? `<span class="contact-item">🔗 <a href="${sanitizeText(
+                  cvData.personalInfo.linkedin
+                )}" target="_blank" rel="noopener noreferrer">LinkedIn</a></span>`
+              : ""
           }
           ${
-            cvData.personalInfo?.location
-              ? `<span class="contact-item">📍 ${sanitizeText(
-                  cvData.personalInfo.location
-                )}</span>`
+            cvData.personalInfo?.github
+              ? `<span class="contact-item">⚡ <a href="${sanitizeText(
+                  cvData.personalInfo.github
+                )}" target="_blank" rel="noopener noreferrer">GitHub</a></span>`
               : ""
           }
           ${
@@ -606,28 +623,27 @@ export async function generateCVHTML(
 }
 
 // Utility function to validate CV data
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function validateCVData(cvData: any): {
+export function validateCVData(cvData: unknown): {
   isValid: boolean;
   errors: string[];
 } {
   const errors: string[] = [];
-
-  if (!cvData.personalInfo?.name) {
+  if (!cvData || typeof cvData !== "object") {
+    return { isValid: false, errors: ["Invalid data format"] };
+  }
+  const d = cvData as { personalInfo?: { name?: string; email?: string } };
+  if (!d.personalInfo?.name) {
     errors.push("Name is required");
   }
-
-  if (!cvData.personalInfo?.email) {
+  if (!d.personalInfo?.email) {
     errors.push("Email is required");
   }
-
   if (
-    cvData.personalInfo?.email &&
-    !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cvData.personalInfo.email)
+    d.personalInfo?.email &&
+    !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(d.personalInfo.email)
   ) {
     errors.push("Invalid email format");
   }
-
   return {
     isValid: errors.length === 0,
     errors,

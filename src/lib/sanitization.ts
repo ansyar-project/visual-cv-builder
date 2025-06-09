@@ -150,138 +150,187 @@ export function sanitizeUrl(url: string): string {
 }
 
 // Sanitize CV data object
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function sanitizeCVData(data: any): any {
+export function sanitizeCVData(data: unknown): unknown {
   if (!data || typeof data !== "object") {
     return {};
   }
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const sanitized: any = {};
+  const d = data as {
+    title?: unknown;
+    personalInfo?: {
+      name?: unknown;
+      email?: unknown;
+      phone?: unknown;
+      location?: unknown;
+      linkedin?: unknown;
+      github?: unknown;
+    };
+    summary?: unknown;
+    experience?: unknown;
+    education?: unknown;
+    skills?: unknown;
+    projects?: unknown;
+    certifications?: unknown;
+  };
+  const sanitized: Record<string, unknown> = {};
 
   // Sanitize title
-  if (data.title) {
-    sanitized.title = sanitizeText(data.title, { maxLength: 200 });
+  if (typeof d.title === "string") {
+    sanitized.title = sanitizeText(d.title, { maxLength: 200 });
   }
-
   // Sanitize personal info
-  if (data.personalInfo) {
+  if (d.personalInfo && typeof d.personalInfo === "object") {
     sanitized.personalInfo = {
-      name: sanitizeText(data.personalInfo.name || "", { maxLength: 100 }),
-      email: sanitizeEmail(data.personalInfo.email || ""),
-      phone: sanitizePhone(data.personalInfo.phone || ""),
-      location: sanitizeText(data.personalInfo.location || "", {
-        maxLength: 200,
-      }),
+      name:
+        typeof d.personalInfo.name === "string"
+          ? sanitizeText(d.personalInfo.name, { maxLength: 100 })
+          : "",
+      email:
+        typeof d.personalInfo.email === "string"
+          ? sanitizeEmail(d.personalInfo.email)
+          : "",
+      phone:
+        typeof d.personalInfo.phone === "string"
+          ? sanitizePhone(d.personalInfo.phone)
+          : "",
+      location:
+        typeof d.personalInfo.location === "string"
+          ? sanitizeText(d.personalInfo.location, { maxLength: 200 })
+          : "",
+      linkedin:
+        typeof d.personalInfo.linkedin === "string"
+          ? sanitizeUrl(d.personalInfo.linkedin)
+          : "",
+      github:
+        typeof d.personalInfo.github === "string"
+          ? sanitizeUrl(d.personalInfo.github)
+          : "",
     };
   }
-
   // Sanitize summary
-  if (data.summary) {
-    sanitized.summary = sanitizeText(data.summary, {
+  if (typeof d.summary === "string") {
+    sanitized.summary = sanitizeText(d.summary, {
       maxLength: 2000,
       allowHTML: true,
       allowedTags: ["p", "br", "strong", "em", "ul", "ol", "li"],
       allowedAttributes: {},
     });
   }
-
   // Sanitize experience array
-  if (Array.isArray(data.experience)) {
-    sanitized.experience = data.experience.map(
-      (exp: {
-        position?: string;
-        company?: string;
-        duration?: string;
-        description?: string;
-      }) => ({
-        position: sanitizeText(exp.position || "", { maxLength: 200 }),
-        company: sanitizeText(exp.company || "", { maxLength: 200 }),
-        duration: sanitizeText(exp.duration || "", { maxLength: 100 }),
-        description: sanitizeText(exp.description || "", {
-          maxLength: 1000,
-          allowHTML: true,
-          allowedTags: ["p", "br", "strong", "em", "ul", "ol", "li"],
-          allowedAttributes: {},
-        }),
+  if (Array.isArray(d.experience)) {
+    sanitized.experience = d.experience.map(
+      (exp): Record<string, unknown> => ({
+        position:
+          typeof exp.position === "string"
+            ? sanitizeText(exp.position, { maxLength: 200 })
+            : "",
+        company:
+          typeof exp.company === "string"
+            ? sanitizeText(exp.company, { maxLength: 200 })
+            : "",
+        duration:
+          typeof exp.duration === "string"
+            ? sanitizeText(exp.duration, { maxLength: 100 })
+            : "",
+        description:
+          typeof exp.description === "string"
+            ? sanitizeText(exp.description, {
+                maxLength: 1000,
+                allowHTML: true,
+                allowedTags: ["p", "br", "strong", "em", "ul", "ol", "li"],
+                allowedAttributes: {},
+              })
+            : "",
       })
     );
   }
-
   // Sanitize education array
-  if (Array.isArray(data.education)) {
-    sanitized.education = data.education.map(
-      (edu: {
-        degree?: string;
-        institution?: string;
-        year?: string;
-        description?: string;
-      }) => ({
-        degree: sanitizeText(edu.degree || "", { maxLength: 200 }),
-        institution: sanitizeText(edu.institution || "", { maxLength: 200 }),
-        year: sanitizeText(edu.year || "", { maxLength: 50 }),
-        description: sanitizeText(edu.description || "", {
-          maxLength: 1000,
-          allowHTML: true,
-          allowedTags: ["p", "br", "strong", "em", "ul", "ol", "li"],
-          allowedAttributes: {},
-        }),
+  if (Array.isArray(d.education)) {
+    sanitized.education = d.education.map(
+      (edu): Record<string, unknown> => ({
+        degree:
+          typeof edu.degree === "string"
+            ? sanitizeText(edu.degree, { maxLength: 200 })
+            : "",
+        institution:
+          typeof edu.institution === "string"
+            ? sanitizeText(edu.institution, { maxLength: 200 })
+            : "",
+        year:
+          typeof edu.year === "string"
+            ? sanitizeText(edu.year, { maxLength: 50 })
+            : "",
+        description:
+          typeof edu.description === "string"
+            ? sanitizeText(edu.description, {
+                maxLength: 1000,
+                allowHTML: true,
+              })
+            : "",
       })
     );
   }
-
   // Sanitize skills array
-  if (Array.isArray(data.skills)) {
-    sanitized.skills = data.skills
-      .map((skill: string) => sanitizeText(skill || "", { maxLength: 100 }))
-      .filter((skill: string) => skill.length > 0);
+  if (Array.isArray(d.skills)) {
+    sanitized.skills = d.skills
+      .map((skill: unknown) =>
+        typeof skill === "string" ? sanitizeText(skill, { maxLength: 100 }) : ""
+      )
+      .filter(
+        (skill: unknown) => typeof skill === "string" && skill.length > 0
+      );
   }
-
   // Sanitize certifications array if present
-  if (Array.isArray(data.certifications)) {
-    sanitized.certifications = data.certifications.map(
-      (cert: {
-        name?: string;
-        issuer?: string;
-        date?: string;
-        url?: string;
-      }) => ({
-        name: sanitizeText(cert.name || "", { maxLength: 200 }),
-        issuer: sanitizeText(cert.issuer || "", { maxLength: 200 }),
-        date: sanitizeText(cert.date || "", { maxLength: 50 }),
-        url: sanitizeUrl(cert.url || ""),
+  if (Array.isArray(d.certifications)) {
+    sanitized.certifications = d.certifications.map(
+      (cert): Record<string, unknown> => ({
+        name:
+          typeof cert.name === "string"
+            ? sanitizeText(cert.name, { maxLength: 200 })
+            : "",
+        issuer:
+          typeof cert.issuer === "string"
+            ? sanitizeText(cert.issuer, { maxLength: 200 })
+            : "",
+        date:
+          typeof cert.date === "string"
+            ? sanitizeText(cert.date, { maxLength: 50 })
+            : "",
+        url: typeof cert.url === "string" ? sanitizeUrl(cert.url) : "",
       })
     );
   }
-
   // Sanitize projects array if present
-  if (Array.isArray(data.projects)) {
-    sanitized.projects = data.projects.map(
-      (proj: {
-        name?: string;
-        description?: string;
-        technologies?: string[];
-        url?: string;
-      }) => ({
-        name: sanitizeText(proj.name || "", { maxLength: 200 }),
-        description: sanitizeText(proj.description || "", {
-          maxLength: 1000,
-          allowHTML: true,
-          allowedTags: ["p", "br", "strong", "em", "ul", "ol", "li"],
-          allowedAttributes: {},
-        }),
+  if (Array.isArray(d.projects)) {
+    sanitized.projects = d.projects.map(
+      (proj): Record<string, unknown> => ({
+        name:
+          typeof proj.name === "string"
+            ? sanitizeText(proj.name, { maxLength: 200 })
+            : "",
+        description:
+          typeof proj.description === "string"
+            ? sanitizeText(proj.description, {
+                maxLength: 1000,
+                allowHTML: true,
+                allowedTags: ["p", "br", "strong", "em", "ul", "ol", "li"],
+                allowedAttributes: {},
+              })
+            : "",
         technologies: Array.isArray(proj.technologies)
           ? proj.technologies
-              .map((tech: string) =>
-                sanitizeText(tech || "", { maxLength: 50 })
+              .map((tech: unknown) =>
+                typeof tech === "string"
+                  ? sanitizeText(tech, { maxLength: 50 })
+                  : ""
               )
-              .filter((tech: string) => tech.length > 0)
+              .filter(
+                (tech: unknown) => typeof tech === "string" && tech.length > 0
+              )
           : [],
-        url: sanitizeUrl(proj.url || ""),
+        url: typeof proj.url === "string" ? sanitizeUrl(proj.url) : "",
       })
     );
   }
-
   return sanitized;
 }
 

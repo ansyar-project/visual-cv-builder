@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import CVPreview from "./CVPreview";
+import CVThemeSelector from "./CVThemeSelector";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -13,18 +14,28 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Plus, Trash2, Save, FileDown, AlertCircle } from "lucide-react";
+import {
+  Plus,
+  Trash2,
+  Save,
+  FileDown,
+  AlertCircle,
+} from "lucide-react";
 import { sanitizeCVData } from "@/lib/sanitization";
+import { DEFAULT_THEME, applyThemeToElement } from "@/lib/cv-themes";
 import ErrorBoundary from "./ErrorBoundary";
 import { FormLoadingOverlay, ButtonLoading } from "./LoadingComponents";
 
 interface CVData {
   title: string;
+  theme: string;
   personalInfo: {
     name: string;
     email: string;
     phone: string;
     location: string;
+    linkedin: string;
+    github: string;
   };
   summary: string;
   experience: Array<{
@@ -56,8 +67,6 @@ export default function CVForm({ initialData }: CVFormProps) {
   const [saveLoading, setSaveLoading] = useState(false);
   const [pdfLoading, setPdfLoading] = useState(false);
   const [error, setError] = useState("");
-  const [saveError, setSaveError] = useState("");
-  const [pdfError, setPdfError] = useState("");
   // Refs for scroll synchronization
   const formRef = useRef<HTMLDivElement>(null);
   const previewRef = useRef<HTMLDivElement>(null);
@@ -87,11 +96,14 @@ export default function CVForm({ initialData }: CVFormProps) {
   }, []);
   const [cvData, setCvData] = useState<CVData>({
     title: initialData?.title || "",
+    theme: initialData?.content?.theme || DEFAULT_THEME.id,
     personalInfo: {
       name: initialData?.content?.personalInfo?.name || "",
       email: initialData?.content?.personalInfo?.email || "",
       phone: initialData?.content?.personalInfo?.phone || "",
       location: initialData?.content?.personalInfo?.location || "",
+      linkedin: initialData?.content?.personalInfo?.linkedin || "",
+      github: initialData?.content?.personalInfo?.github || "",
     },
     summary: initialData?.content?.summary || "",
     experience: initialData?.content?.experience || [
@@ -207,13 +219,27 @@ export default function CVForm({ initialData }: CVFormProps) {
       skills: [...prev.skills, ""],
     }));
   };
-
   const removeSkill = (index: number) => {
     setCvData((prev) => ({
       ...prev,
       skills: prev.skills.filter((_, i) => i !== index),
     }));
   };
+
+  const handleThemeChange = (themeId: string) => {
+    setCvData((prev) => ({
+      ...prev,
+      theme: themeId,
+    }));
+  };
+
+  // Apply theme to preview container
+  useEffect(() => {
+    const previewElement = previewRef.current;
+    if (previewElement) {
+      applyThemeToElement(previewElement, cvData.theme);
+    }
+  }, [cvData.theme]);
 
   const updateSkill = (index: number, value: string) => {
     setCvData((prev) => ({
@@ -223,7 +249,6 @@ export default function CVForm({ initialData }: CVFormProps) {
   };
   const handleSave = async () => {
     setSaveLoading(true);
-    setSaveError("");
     setError("");
 
     try {
@@ -253,7 +278,6 @@ export default function CVForm({ initialData }: CVFormProps) {
         error instanceof Error
           ? error.message
           : "An unexpected error occurred while saving.";
-      setSaveError(errorMessage);
       setError(errorMessage);
     } finally {
       setSaveLoading(false);
@@ -262,7 +286,6 @@ export default function CVForm({ initialData }: CVFormProps) {
 
   const handleGeneratePDF = async () => {
     setPdfLoading(true);
-    setPdfError("");
     setError("");
 
     try {
@@ -300,7 +323,6 @@ export default function CVForm({ initialData }: CVFormProps) {
         error instanceof Error
           ? error.message
           : "An unexpected error occurred while generating PDF.";
-      setPdfError(errorMessage);
       setError(errorMessage);
     } finally {
       setPdfLoading(false);
@@ -312,6 +334,7 @@ export default function CVForm({ initialData }: CVFormProps) {
         loading={saveLoading || pdfLoading}
         message={saveLoading ? "Saving your CV..." : "Generating PDF..."}
       >
+        {" "}
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 max-w-none mx-auto px-2 min-h-screen">
           {/* Form Section */}
           <div
@@ -319,6 +342,11 @@ export default function CVForm({ initialData }: CVFormProps) {
             className="space-y-6 overflow-y-auto pr-4 scroll-sync-container"
             style={{ maxHeight: containerHeight }}
           >
+            {/* Theme Selector */}
+            <CVThemeSelector
+              selectedTheme={cvData.theme}
+              onThemeChange={handleThemeChange}
+            />
             {/* Basic Info Card */}
             <Card>
               <CardHeader>
@@ -425,7 +453,7 @@ export default function CVForm({ initialData }: CVFormProps) {
                       }
                       placeholder="+1 (555) 123-4567"
                     />
-                  </div>
+                  </div>{" "}
                   <div className="space-y-2">
                     <label className="text-sm font-medium">Location</label>
                     <Input
@@ -440,6 +468,40 @@ export default function CVForm({ initialData }: CVFormProps) {
                         }))
                       }
                       placeholder="New York, NY"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">LinkedIn URL</label>
+                    <Input
+                      type="url"
+                      value={cvData.personalInfo.linkedin}
+                      onChange={(e) =>
+                        setCvData((prev) => ({
+                          ...prev,
+                          personalInfo: {
+                            ...prev.personalInfo,
+                            linkedin: e.target.value,
+                          },
+                        }))
+                      }
+                      placeholder="https://linkedin.com/in/yourprofile"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">GitHub URL</label>
+                    <Input
+                      type="url"
+                      value={cvData.personalInfo.github}
+                      onChange={(e) =>
+                        setCvData((prev) => ({
+                          ...prev,
+                          personalInfo: {
+                            ...prev.personalInfo,
+                            github: e.target.value,
+                          },
+                        }))
+                      }
+                      placeholder="https://github.com/yourusername"
                     />
                   </div>
                 </div>

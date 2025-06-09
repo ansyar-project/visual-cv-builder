@@ -5,13 +5,11 @@ import { sanitizeCVData, sanitizeText, sanitizeEmail } from "./sanitization";
 export interface ValidationResult {
   isValid: boolean;
   errors: string[];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  sanitizedData?: any;
+  sanitizedData?: unknown;
 }
 
 // Validate CV data structure and content
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function validateAndSanitizeCVData(data: any): ValidationResult {
+export function validateAndSanitizeCVData(data: unknown): ValidationResult {
   const errors: string[] = [];
 
   // Check if data exists
@@ -22,36 +20,42 @@ export function validateAndSanitizeCVData(data: any): ValidationResult {
     };
   }
 
+  // Use type assertion for validation
+  const d = data as {
+    title?: unknown;
+    personalInfo?: { name?: unknown; email?: unknown };
+    experience?: unknown;
+    education?: unknown;
+    skills?: unknown;
+  };
+
   // Validate required fields
-  if (!data.title || typeof data.title !== "string") {
+  if (!d.title || typeof d.title !== "string") {
     errors.push("CV title is required and must be a string");
   }
 
-  if (!data.personalInfo || typeof data.personalInfo !== "object") {
+  if (!d.personalInfo || typeof d.personalInfo !== "object") {
     errors.push("Personal information is required");
   } else {
-    if (!data.personalInfo.name || typeof data.personalInfo.name !== "string") {
+    const pi = d.personalInfo as Record<string, unknown>;
+    if (!("name" in pi) || typeof pi.name !== "string") {
       errors.push("Name is required and must be a string");
     }
-
-    if (
-      !data.personalInfo.email ||
-      typeof data.personalInfo.email !== "string"
-    ) {
+    if (!("email" in pi) || typeof pi.email !== "string") {
       errors.push("Email is required and must be a string");
     }
   }
 
   // Validate arrays
-  if (data.experience && !Array.isArray(data.experience)) {
+  if (d.experience && !Array.isArray(d.experience)) {
     errors.push("Experience must be an array");
   }
 
-  if (data.education && !Array.isArray(data.education)) {
+  if (d.education && !Array.isArray(d.education)) {
     errors.push("Education must be an array");
   }
 
-  if (data.skills && !Array.isArray(data.skills)) {
+  if (d.skills && !Array.isArray(d.skills)) {
     errors.push("Skills must be an array");
   }
 
@@ -79,8 +83,7 @@ export function validateAndSanitizeCVData(data: any): ValidationResult {
 }
 
 // Validate user registration data
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function validateUserRegistration(data: any): ValidationResult {
+export function validateUserRegistration(data: unknown): ValidationResult {
   const errors: string[] = [];
 
   if (!data || typeof data !== "object") {
@@ -90,31 +93,34 @@ export function validateUserRegistration(data: any): ValidationResult {
     };
   }
 
+  // Use type assertion for validation
+  const d = data as { name?: unknown; email?: unknown; password?: unknown };
+
   // Validate name
-  if (!data.name || typeof data.name !== "string") {
+  if (!d.name || typeof d.name !== "string") {
     errors.push("Name is required and must be a string");
-  } else if (data.name.length < 2) {
+  } else if (d.name.length < 2) {
     errors.push("Name must be at least 2 characters long");
-  } else if (data.name.length > 100) {
+  } else if (d.name.length > 100) {
     errors.push("Name must be less than 100 characters long");
   }
 
   // Validate email
-  if (!data.email || typeof data.email !== "string") {
+  if (!d.email || typeof d.email !== "string") {
     errors.push("Email is required and must be a string");
   } else {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(data.email)) {
+    if (!emailRegex.test(d.email)) {
       errors.push("Invalid email format");
     }
   }
 
   // Validate password
-  if (!data.password || typeof data.password !== "string") {
+  if (!d.password || typeof d.password !== "string") {
     errors.push("Password is required and must be a string");
-  } else if (data.password.length < 8) {
+  } else if (d.password.length < 8) {
     errors.push("Password must be at least 8 characters long");
-  } else if (data.password.length > 128) {
+  } else if (d.password.length > 128) {
     errors.push("Password must be less than 128 characters long");
   }
 
@@ -128,9 +134,12 @@ export function validateUserRegistration(data: any): ValidationResult {
   // Sanitize the data
   try {
     const sanitizedData = {
-      name: sanitizeText(data.name, { maxLength: 100 }),
-      email: sanitizeEmail(data.email),
-      password: data.password, // Don't sanitize password as it needs to be hashed
+      name:
+        typeof d.name === "string"
+          ? sanitizeText(d.name, { maxLength: 100 })
+          : "",
+      email: typeof d.email === "string" ? sanitizeEmail(d.email) : "",
+      password: typeof d.password === "string" ? d.password : "", // Don't sanitize password as it needs to be hashed
     };
     return {
       isValid: true,
@@ -146,16 +155,16 @@ export function validateUserRegistration(data: any): ValidationResult {
 }
 
 // Rate limiting validation
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function validateRateLimit(
   _identifier: string,
   _action: string
 ): boolean {
   // This would typically check against a rate limiting store
   // For now, we'll implement a simple check
-
   // Implementation would depend on your rate limiting strategy
   // This is a placeholder for the actual implementation
+  void _identifier;
+  void _action;
   return true;
 }
 

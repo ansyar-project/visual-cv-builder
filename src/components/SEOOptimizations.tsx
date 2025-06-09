@@ -28,9 +28,9 @@ export default function SEOOptimizations() {
   }, []); // Track page views
   useEffect(() => {
     const gaId = process.env.NEXT_PUBLIC_GA_ID;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // Use unknown instead of any for gtag
     const windowWithGtag = window as Window & {
-      gtag?: (...args: any[]) => void;
+      gtag?: (...args: unknown[]) => unknown;
     };
     if (typeof window !== "undefined" && windowWithGtag.gtag && gaId) {
       windowWithGtag.gtag("config", gaId, {
