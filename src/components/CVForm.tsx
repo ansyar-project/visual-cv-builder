@@ -56,6 +56,8 @@ export default function CVForm({ initialData }: CVFormProps) {
   const [saveLoading, setSaveLoading] = useState(false);
   const [pdfLoading, setPdfLoading] = useState(false);
   const [error, setError] = useState("");
+  const [saveError, setSaveError] = useState("");
+  const [pdfError, setPdfError] = useState("");
   // Refs for scroll synchronization
   const formRef = useRef<HTMLDivElement>(null);
   const previewRef = useRef<HTMLDivElement>(null);
