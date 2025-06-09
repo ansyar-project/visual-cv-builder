@@ -1,0 +1,29 @@
+# Node modules and lock files
+node_modules
+npm-debug.log
+yarn-error.log
+pnpm-debug.log
+
+# Build output
+.next
+out
+dist
+coverage
+
+# Local env files
+.env
+.env.*
+!.env.template
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Prisma generated files
+prisma/dev.db
+
+# Misc
+*.local
+*.log
+.idea/
+.vscode/
