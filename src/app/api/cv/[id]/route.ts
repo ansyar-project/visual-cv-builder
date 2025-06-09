@@ -69,16 +69,14 @@ export async function PUT(
     }
 
     // Sanitize input data to prevent XSS attacks
-    const sanitizedData = sanitizeCVData(cvData);
 
-    const cv = await cvOperations.update(id, user.id, {
-      title: sanitizedData.title,
-      personalInfo: sanitizedData.personalInfo,
-      summary: sanitizedData.summary,
-      experience: sanitizedData.experience,
-      education: sanitizedData.education,
-      skills: sanitizedData.skills,
-    });
+    // Ensure theme is present for CVData
+    const sanitizedData = sanitizeCVData(cvData) as import("@/lib/db").CVData;
+    if (!sanitizedData.theme) {
+      sanitizedData.theme = "default";
+    }
+
+    const cv = await cvOperations.update(id, user.id, sanitizedData);
 
     return NextResponse.json(cv);
   } catch (error) {

@@ -57,16 +57,12 @@ export async function POST(request: NextRequest) {
     }
 
     // Sanitize input data to prevent XSS attacks
-    const sanitizedData = sanitizeCVData(cvData);
+    const sanitizedData = sanitizeCVData(cvData) as import("@/lib/db").CVData;
+    if (!("theme" in sanitizedData) || !sanitizedData.theme) {
+      (sanitizedData as Record<string, unknown>).theme = "default";
+    }
 
-    const cv = await cvOperations.create(user.id, {
-      title: sanitizedData.title,
-      personalInfo: sanitizedData.personalInfo,
-      summary: sanitizedData.summary,
-      experience: sanitizedData.experience,
-      education: sanitizedData.education,
-      skills: sanitizedData.skills,
-    });
+    const cv = await cvOperations.create(user.id, sanitizedData);
 
     return NextResponse.json(cv, { status: 201 });
   } catch (error) {

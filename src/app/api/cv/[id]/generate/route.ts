@@ -60,7 +60,7 @@ export async function POST(
       template: cv.template || "default",
       includeBackground: body.includeBackground !== false,
     }; // Generate HTML from CV data using sanitized content
-    const htmlContent = await generateCVHTML(sanitizedContent, cv.template);
+    const htmlContent = await generateCVHTML(sanitizedContent);
 
     // Generate unique filename
     const filename = `cv-${cv.id}-${uuidv4()}`;
