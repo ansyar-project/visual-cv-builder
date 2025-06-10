@@ -95,8 +95,12 @@ export default withAuth(
   {
     callbacks: {
       authorized: ({ token, req }) => {
-        // Allow public access to auth routes
-        if (req.nextUrl.pathname.startsWith("/api/auth")) {
+        const publicPaths = ["/", "/auth/signin", "/auth/signup"];
+        // Allow public access to auth routes, sign in/up, and root
+        if (
+          req.nextUrl.pathname.startsWith("/api/auth") ||
+          publicPaths.includes(req.nextUrl.pathname)
+        ) {
           return true;
         }
         // Require authentication for protected routes
